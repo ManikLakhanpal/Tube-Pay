@@ -1,9 +1,12 @@
 import { Router } from "express";
 import passport from "passport";
-import loginUser from "../controller/user";
+import { loginUser } from "../controller/user";
 
 const router = Router();
 
+/*
+ *    Logs in user, returns user object or null on error
+ */
 router.get(
   "/google",
   passport.authenticate("google", {
@@ -12,6 +15,9 @@ router.get(
   })
 );
 
+/*
+ *    Logs in user, returns user object or null on error
+ */
 router.get("/google/callback",
   passport.authenticate("google", {
     failureRedirect: `${process.env.FRONTEND_URL}/signin`,
@@ -27,7 +33,10 @@ router.get("/google/callback",
   }
 );
 
-router.delete("/logout", (req: any, res: any) => {
+/*
+ *    Logs out user, returns user object or null on error
+ */
+router.get("/logout", (req: any, res: any) => {
   req.logout((err: any) => {
     if (err) {
       return res.status(500).json({ error: "Failed to logout" });

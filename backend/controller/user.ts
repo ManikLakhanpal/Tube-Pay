@@ -1,6 +1,9 @@
-import { createUser, findUser } from "../services/user";
+import { createUser, findUser, updateUserProfile } from "../services/user";
 
-const loginUser = async (req: any, res: any) => {
+/*
+ *    Logs in user, returns user object or null on error
+ */
+export const loginUser = async (req: any, res: any) => {
   if (!req.user || req.user == null) {
     return res.status(404).json('Login First');
   }
@@ -10,7 +13,7 @@ const loginUser = async (req: any, res: any) => {
     const email = req.user.emails[0].value;
 
     // * Step 1: Search for the user by email
-    let user = await findUser(email);
+    let user = await findUser(email, undefined);
 
     // * Step 2: If user doesn't exist, create it
     if (user == null) {
@@ -18,7 +21,7 @@ const loginUser = async (req: any, res: any) => {
     }
 
     // * Step 3: Return the user
-    return user;
+    return res.status(200).json(user);
 
   } catch (error) {
     console.error("Error logging in user:", error);
@@ -27,4 +30,44 @@ const loginUser = async (req: any, res: any) => {
   }
 };
 
-export default loginUser;
+/*
+ *    Gets user profile by id, returns user object or null on error
+ */
+export const getUserById = async (req: any, res: any) => {
+  try {
+    const { id } = req.params;
+
+    const user = await findUser(undefined, id);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    console.log(user);
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+}
+
+/*
+ *    Updates user profile with name, returns user object or null on error
+ */
+export const updateUser = async (req: any, res: any) => {
+  try {
+      const { uid } = req.user;
+      const { name } = req.body;
+
+      const user = await updateUserProfile(name, uid);
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      res.status(200).json(user);
+  } catch (error) {
+      console.error("Error updating user profile:", error);
+      return res.status(500).json({ error: "Internal Server Error" });
+  }
+}
