@@ -36,7 +36,7 @@ router.get("/google/callback",
 /*
  *    Logs out user, returns user object or null on error
  */
-router.get("/logout", (req: any, res: any) => {
+router.delete("/logout", (req: any, res: any) => {
   req.logout((err: any) => {
     if (err) {
       return res.status(500).json({ error: "Failed to logout" });
