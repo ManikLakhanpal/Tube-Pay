@@ -1,4 +1,4 @@
-import prisma from "../config/prismaCofig";
+import { createUser, findUser } from "../services/user";
 
 const loginUser = async (req: any, res: any) => {
   if (!req.user || req.user == null) {
@@ -10,20 +10,11 @@ const loginUser = async (req: any, res: any) => {
     const email = req.user.emails[0].value;
 
     // * Step 1: Search for the user by email
-    let user = await prisma.user.findUnique({
-      where: {
-        email: email,
-      },
-    });
+    let user = await findUser(email);
 
     // * Step 2: If user doesn't exist, create it
-    if (!user) {
-      user = await prisma.user.create({
-        data: {
-          name: name,
-          email: email,
-        },
-      });
+    if (user == null) {
+      user = await createUser(name, email);
     }
 
     // * Step 3: Return the user
