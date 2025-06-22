@@ -1,5 +1,6 @@
 import { Router } from "express";
 import passport from "passport";
+import loginUser from "../controller/user";
 
 const router = Router();
 
@@ -16,8 +17,9 @@ router.get("/google/callback",
     failureRedirect: `${process.env.FRONTEND_URL}/signin`,
   }),
   async (req: any, res: any) => {
-    
-    console.log(process.env.BACKEND_URL)
+    const user = loginUser(req, res);
+
+    console.log(user);
     res.redirect("/");
   }
 );
