@@ -4,6 +4,7 @@ import authRoutes from "./routes/authRoutes";
 import session from "express-session";
 import redisClient from "./config/redis";
 import { RedisStore } from "connect-redis";
+import authenticate from "./middleware/authenticate";
 
 const app = express();
 const port = process.env.PORT!;
@@ -35,6 +36,12 @@ app.get('/', (req: any, res: any) => {
     }
     
     res.json([{"status": "Not verified"},{"user" :req.user}]);
+})
+
+app.get('/test', authenticate, (req: any, res: any) => {
+    console.log("Protected route was accessed");
+
+    res.json([{"status": "verified"},{"user" : req.user }]);
 })
 
 app.listen(port, () => {

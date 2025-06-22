@@ -1,22 +1,33 @@
 import prisma from "../config/prisma";
 
 const authenticate = async (req: any, res: any, next: any) => {
+  try {
+    if (!req.isAuthenticated || !req.isAuthenticated()) {
+      console.log("User not authenticated");
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
     const { uid } = req.user;
 
     if (!uid) {
-        return res.status(401).json({ error: "Unauthorized" });
+      console.log("UID missing from user session");
+      return res.status(401).json({ error: "UID missing from user session" });
     }
 
     const user = await prisma.user.findUnique({
-        where: { id: uid },
+      where: { id: uid },
     });
-    
+
     if (!user) {
-        return res.status(401).json({ error: "Unauthorized" });
+      console.log("User not found in database");
+      return res.status(401).json({ error: "User not found in database" });
     }
 
-    req.user = user;
     next();
-}
+  } catch (error) {
+    console.error("Authentication middleware error:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
 
 export default authenticate;
