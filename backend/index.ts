@@ -2,12 +2,15 @@ import express from "express";
 import { configurePassport } from "./config/passport";
 import authRoutes from "./routes/authRoutes";
 import session from "express-session";
+import redisClient from "./config/redis";
+import { RedisStore } from "connect-redis";
 
 const app = express();
 const port = process.env.PORT!;
 
 app.use(
   session({
+    store: new RedisStore({ client: redisClient }),
     secret: process.env.SESSION_SECRET || "your-secret-key",
     resave: false,
     saveUninitialized: false,
@@ -28,7 +31,7 @@ app.use('/api/auth', authRoutes);
 
 app.get('/', (req: any, res: any) => {
     if (req.user) {
-        res.json([{"status": "verified"},{"user" :req.user}]);
+        return res.json([{"status": "verified"},{"user" :req.user}]);
     }
     
     res.json([{"status": "Not verified"},{"user" :req.user}]);

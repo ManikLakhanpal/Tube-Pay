@@ -17,11 +17,24 @@ router.get("/google/callback",
     failureRedirect: `${process.env.FRONTEND_URL}/signin`,
   }),
   async (req: any, res: any) => {
-    const user = loginUser(req, res);
+    const user = await loginUser(req, res);
+    
+    if (user != null) {
+      req.user.uid = user!.id;
+    }
 
-    console.log(user);
     res.redirect("/");
   }
 );
+
+router.delete("/logout", (req: any, res: any) => {
+  req.logout((err: any) => {
+    if (err) {
+      return res.status(500).json({ error: "Failed to logout" });
+    }
+  });
+  
+  res.redirect("/");
+});
 
 export default router;

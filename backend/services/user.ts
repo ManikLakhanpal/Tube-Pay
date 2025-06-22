@@ -1,4 +1,4 @@
-import prisma from "../config/prismaCofig";
+import prisma from "../config/prisma";
 
 /* 
  *    Takes email or id and returns user if exists, null if not found
