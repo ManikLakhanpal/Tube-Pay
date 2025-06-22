@@ -18,6 +18,7 @@ model User {
   id         String   @id @default(cuid())
   name       String
   email      String   @unique
+  avatarUrl  String?
   role       Role     @default(USER)
   streams    Stream[] @relation("StreamerStreams")
   payments   Payment[] @relation("UserPayments")
@@ -28,6 +29,7 @@ model Stream {
   id          String     @id @default(cuid())
   title       String
   description String?
+  streamLink  String?
   isLive      Boolean    @default(true)
   streamer    User       @relation("StreamerStreams", fields: [streamerId], references: [id])
   streamerId  String
