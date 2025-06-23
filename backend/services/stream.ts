@@ -73,32 +73,6 @@ export const deleteStream = async (streamId: string) => {
 };
 
 /*
- *    Stops a stream by setting isLive to false, returns updated stream or null on error
- */
-export const stopStream = async (streamId: string) => {
-  try {
-    const stream = await prisma.stream.update({
-      where: { id: streamId },
-      data: { isLive: false },
-      include: {
-        streamer: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            avatarUrl: true,
-          },
-        },
-      },
-    });
-    return stream;
-  } catch (error) {
-    console.error("Error stopping stream:", error);
-    return null;
-  }
-};
-
-/*
  *    Gets a stream by id, returns stream object or null if not found
  */
 export const getStreamById = async (streamId: string) => {

@@ -2,7 +2,6 @@ import {
   createStream, 
   updateStream, 
   deleteStream, 
-  stopStream, 
   getStreamById, 
   getStreamsByStreamer, 
   getLiveStreams 
@@ -40,24 +39,30 @@ export const createStreamHandler = async (req: reqUser, res: any) => {
 export const updateStreamHandler = async (req: reqUser, res: any) => {
   try {
     const { id } = req.params;
-    const { title, description, streamLink } = req.body;
+    const { title, description, streamLink, isLive } = req.body;
     const streamerId = req.user.uid;
 
-    // First check if stream exists and belongs to the user
+    // * STEP 1: First check if stream exists 
     const existingStream = await getStreamById(id);
     if (!existingStream) {
       return res.status(404).json({ error: "Stream not found" });
     }
 
+    // * STEP 2: Check if stream belongs to the user
     if (existingStream.streamerId !== streamerId) {
       return res.status(403).json({ error: "You can only update your own streams" });
     }
 
-    const updates: { title?: string; description?: string; streamLink?: string } = {};
+    // * STEP 3: Create the updates obj and give it to the query
+    const updates: { title?: string; description?: string; streamLink?: string, isLive?: boolean } = {};
     if (title !== undefined) updates.title = title;
     if (description !== undefined) updates.description = description;
+    if (isLive !== undefined) updates.isLive = ((isLive == "true") ? true : false );
+
+    // TODO: Check if streamLink is a valid URL or not
     if (streamLink !== undefined) updates.streamLink = streamLink;
 
+    console.log(updates)
     const stream = await updateStream(id, updates);
 
     if (!stream) {
@@ -79,16 +84,18 @@ export const deleteStreamHandler = async (req: reqUser, res: any) => {
     const { id } = req.params;
     const streamerId = req.user.uid;
 
-    // First check if stream exists and belongs to the user
+    // * STEP 1: First check if stream exists 
     const existingStream = await getStreamById(id);
     if (!existingStream) {
       return res.status(404).json({ error: "Stream not found" });
     }
 
+    // * STEP 2: Check if stream belongs to the user
     if (existingStream.streamerId !== streamerId) {
       return res.status(403).json({ error: "You can only delete your own streams" });
     }
 
+    // ! STEP 3: Delete the stream
     const success = await deleteStream(id);
 
     if (!success) {
@@ -98,37 +105,6 @@ export const deleteStreamHandler = async (req: reqUser, res: any) => {
     return res.status(200).json({ message: "Stream deleted successfully" });
   } catch (error) {
     console.error("Error in deleteStreamHandler:", error);
-    return res.status(500).json({ error: "Internal Server Error" });
-  }
-};
-
-/*
- *    Stops a stream by setting isLive to false, returns updated stream or error
- */
-export const stopStreamHandler = async (req: reqUser, res: any) => {
-  try {
-    const { id } = req.params;
-    const streamerId = req.user.uid;
-
-    // First check if stream exists and belongs to the user
-    const existingStream = await getStreamById(id);
-    if (!existingStream) {
-      return res.status(404).json({ error: "Stream not found" });
-    }
-
-    if (existingStream.streamerId !== streamerId) {
-      return res.status(403).json({ error: "You can only stop your own streams" });
-    }
-
-    const stream = await stopStream(id);
-
-    if (!stream) {
-      return res.status(500).json({ error: "Failed to stop stream" });
-    }
-
-    return res.status(200).json(stream);
-  } catch (error) {
-    console.error("Error in stopStreamHandler:", error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -156,22 +132,23 @@ export const getStreamByIdHandler = async (req: reqUser, res: any) => {
 /*
  *    Gets all streams for the authenticated user, returns array of streams or error
  */
-export const getMyStreamsHandler = async (req: reqUser, res: any) => {
-  try {
-    const streamerId = req.user.uid;
+// export const getMyStreamsHandler = async (req: reqUser, res: any) => {
+// //   try {
+// //     const streamerId = req.user.uid;
 
-    const streams = await getStreamsByStreamer(streamerId);
+// //     const streams = await getStreamsByStreamer(streamerId);
 
-    if (streams === null) {
-      return res.status(500).json({ error: "Failed to fetch streams" });
-    }
+// //     if (streams === null) {
+// //       return res.status(500).json({ error: "Failed to fetch streams" });
+// //     }
 
-    return res.status(200).json(streams);
-  } catch (error) {
-    console.error("Error in getMyStreamsHandler:", error);
-    return res.status(500).json({ error: "Internal Server Error" });
-  }
-};
+// //     return res.status(200).json(streams);
+// //   } catch (error) {
+// //     console.error("Error in getMyStreamsHandler:", error);
+// //     return res.status(500).json({ error: "Internal Server Error" });
+// //   }
+// // };
+// };
 
 /*
  *    Gets all live streams, returns array of streams or error

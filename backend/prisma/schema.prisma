@@ -39,6 +39,7 @@ model Stream {
 model Payment {
   id         String    @id @default(cuid())
   amount     Float
+  message    String?
   user       User      @relation("UserPayments", fields: [userId], references: [id])
   userId     String
   stream     Stream    @relation("StreamPayments", fields: [streamId], references: [id])
