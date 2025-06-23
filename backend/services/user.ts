@@ -1,5 +1,20 @@
 import prisma from "../config/prisma";
 
+const userSelectFields = {
+  name: true,
+  email: true,
+  role: true,
+  streams: {
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      isLive: true,
+      createdAt: true,
+    },
+  },
+};
+
 /*
  *    Takes email or id and returns user if exists, null if not found
  *    Uses findUnique for id, findUnique for email
@@ -9,39 +24,13 @@ export const findUser = async (email?: string, id?: string) => {
     if (id) {
       return await prisma.user.findUnique({
         where: { id },
-        select: {
-          name: true,
-          email: true,
-          role: true,
-          streams: {
-            select: {
-              id: true,
-              title: true,
-              description: true,
-              isLive: true,
-              createdAt: true,
-            },
-          },
-        },
+        select: userSelectFields,
       });
     }
     if (email) {
       return await prisma.user.findUnique({
         where: { email },
-        select: {
-          name: true,
-          email: true,
-          role: true,
-          streams: {
-            select: {
-              id: true,
-              title: true,
-              description: true,
-              isLive: true,
-              createdAt: true,
-            },
-          },
-        },
+        select: userSelectFields,
       });
     }
     return null;
@@ -62,21 +51,9 @@ export const createUser = async (name: string, email: string) => {
         name,
         email,
       },
-      select: {
-        name: true,
-        email: true,
-        role: true,
-        streams: {
-          select: {
-            id: true,
-            title: true,
-            description: true,
-            isLive: true,
-            createdAt: true,
-          },
-        },
-      },
+      select: userSelectFields,
     });
+    
     return user;
   } catch (error) {
     console.error(`Error creating user`);

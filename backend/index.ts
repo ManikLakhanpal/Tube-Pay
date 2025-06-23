@@ -41,13 +41,13 @@ app.get('/', (req: reqUser, res: any) => {
         return res.json([{"status": "verified"},{"user" :req.user}]);
     }
     
-    res.json([{"status": "Not verified"},{"user" :req.user}]);
+    res.status(200).json([{"status": "Not verified"},{"user" :req.user}]);
 })
 
 app.get('/test', authenticate, (req: reqUser, res: any) => {
     console.log("Protected route was accessed");
 
-    res.json([{"status": "verified"},{"user" : req.user }]);
+    res.status(200).json([{"status": "verified"},{"user" : req.user }]);
 })
 
 app.listen(port, () => {
