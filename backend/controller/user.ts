@@ -22,8 +22,12 @@ export const loginUser = async (req: reqUser, res: any) => {
       user = await createUser(name, email);
     }
 
+    if (user != null) {
+      req.user.uid = user!.id;
+    }
+
     // * Step 3: Return the user
-    return res.status(200).json(user);
+    return res.redirect("/");
 
   } catch (error) {
     console.error("Error logging in user:", error);
