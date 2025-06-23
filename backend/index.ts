@@ -6,6 +6,7 @@ import redisClient from "./config/redis";
 import { RedisStore } from "connect-redis";
 import { authenticate } from "./middleware/authenticate";
 import userRoutes from "./routes/userRoutes";
+import streamRoutes from "./routes/streamRoutes";
 import { reqUser } from "./types";
 
 const app = express();
@@ -35,6 +36,7 @@ app.use(passport.session());
 // * Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/streams', streamRoutes);
 
 app.get('/', (req: reqUser, res: any) => {
     if (req.user) {

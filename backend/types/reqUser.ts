@@ -1,4 +1,5 @@
 import { Request } from "express";
+import passport from "passport";
 
 export interface reqUser extends Request {
   user: {

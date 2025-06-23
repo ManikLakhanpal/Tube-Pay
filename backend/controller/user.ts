@@ -14,6 +14,7 @@ export const loginUser = async (req: reqUser, res: any) => {
     const email = req.user.emails[0].value;
 
     // * Step 1: Search for the user by email
+    console.log("Finding the user");
     let user = await findUser(email, undefined);
 
     // * Step 2: If user doesn't exist, create it
