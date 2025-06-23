@@ -1,6 +1,7 @@
 import prisma from "../config/prisma";
+import { reqUser } from "../types";
 
-const authenticate = async (req: any, res: any, next: any) => {
+const authenticate = async (req: reqUser, res: any, next: any) => {
   try {
     if (!req.isAuthenticated || !req.isAuthenticated()) {
       console.log("User not authenticated");

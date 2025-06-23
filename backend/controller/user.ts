@@ -1,9 +1,10 @@
 import { createUser, findUser, updateUserProfile } from "../services/user";
+import { reqUser } from "../types";
 
 /*
  *    Logs in user, returns user object or null on error
  */
-export const loginUser = async (req: any, res: any) => {
+export const loginUser = async (req: reqUser, res: any) => {
   if (!req.user || req.user == null) {
     return res.status(404).json('Login First');
   }
@@ -33,7 +34,7 @@ export const loginUser = async (req: any, res: any) => {
 /*
  *    Gets user profile by id, returns user object or null on error
  */
-export const getUserById = async (req: any, res: any) => {
+export const getUserById = async (req: reqUser, res: any) => {
   try {
     const { id } = req.params;
 
@@ -54,7 +55,7 @@ export const getUserById = async (req: any, res: any) => {
 /*
  *    Updates user profile with name, returns user object or null on error
  */
-export const updateUser = async (req: any, res: any) => {
+export const updateUser = async (req: reqUser, res: any) => {
   try {
       const { uid } = req.user;
       const { name } = req.body;
