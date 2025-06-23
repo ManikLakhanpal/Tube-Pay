@@ -6,7 +6,9 @@ import { reqUser } from "../types";
 const router = Router();
 
 /*
- *    Logs in user, returns user object or null on error
+ *    Logs in user
+ *    GET /api/auth/google
+ *    Returns: user object or null on error
  */
 router.get(
   "/google",
@@ -17,7 +19,9 @@ router.get(
 );
 
 /*
- *    Logs in user, returns user object or null on error
+ *    Logs in user
+ *    GET /api/auth/google/callback
+ *    Returns: user object or null on error
  */
 router.get("/google/callback",
   passport.authenticate("google", {
@@ -29,7 +33,9 @@ router.get("/google/callback",
 );
 
 /*
- *    Logs out user, returns user object or null on error
+ *    Logs out user
+ *    DELETE /api/auth/logout
+ *    Returns: user object or null on error
  */
 router.delete("/logout", (req: reqUser, res: any) => {
   req.logout((err: any) => {
