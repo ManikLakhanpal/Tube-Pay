@@ -62,18 +62,23 @@ export const getUserById = async (req: reqUser, res: any) => {
  */
 export const updateUser = async (req: reqUser, res: any) => {
   try {
-      const { uid } = req.user;
-      const { name } = req.body;
+    const { uid } = req.user;
+    const { name, avatarUrl, role } = req.body;
 
-      const user = await updateUserProfile(name, uid);
+    const user = await updateUserProfile(name, uid, avatarUrl, role);
 
-      if (!user) {
-        return res.status(404).json({ error: "User not found" });
-      }
-      
-      res.status(200).json(user);
-  } catch (error) {
-      console.error("Error updating user profile:", error);
-      return res.status(500).json({ error: "Internal Server Error" });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    return res.status(200).json(user);
+  } catch (error: any) {
+    const message = error.message || "Internal Server Error";
+
+    if (message.includes("not allowed")) {
+      return res.status(403).json({ error: message });
+    }
+
+    return res.status(500).json({ error: message });
   }
-}
+};

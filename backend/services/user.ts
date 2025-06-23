@@ -66,17 +66,41 @@ export const createUser = async (name: string, email: string) => {
  *    Updates user profile with name, returns user object or null on error
  *    Updates user profile with name, returns user object or null on error
  */
-export const updateUserProfile = async (name: string, uid: string) => {
+const ALLOWED_ROLES = ["USER", "STREAMER"] as const;
+type Role = typeof ALLOWED_ROLES[number];
+
+export const updateUserProfile = async (
+  name: string | undefined,
+  uid: string,
+  avatarUrl?: string,
+  role?: Role
+) => {
   try {
+    const data: Partial<{
+      name: string;
+      avatarUrl: string;
+      role: Role;
+    }> = {};
+
+    if (name !== undefined) data.name = name;
+    if (avatarUrl !== undefined) data.avatarUrl = avatarUrl;
+
+    if (role !== undefined) {
+      if (!ALLOWED_ROLES.includes(role)) {
+        throw new Error(`Role '${role}' is not allowed`);
+      }
+      data.role = role;
+    }
+
     const user = await prisma.user.update({
       where: { id: uid },
-      data: {
-        name: name,
-      },
+      data,
     });
+
     return user;
-  } catch (error) {
-    console.error(`Error updating user profile`);
-    return null;
+  } catch (error: any) {
+    console.error(`Error updating user profile: ${error.message}`, error);
+    throw error; // rethrow for upstream handling
   }
 };
+
