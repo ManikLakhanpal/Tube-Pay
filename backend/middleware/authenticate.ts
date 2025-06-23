@@ -1,7 +1,8 @@
 import prisma from "../config/prisma";
+import { findUser } from "../services/user";
 import { reqUser } from "../types";
 
-const authenticate = async (req: reqUser, res: any, next: any) => {
+export const authenticate = async (req: reqUser, res: any, next: any) => {
   try {
     if (!req.isAuthenticated || !req.isAuthenticated()) {
       console.log("User not authenticated");
@@ -15,13 +16,11 @@ const authenticate = async (req: reqUser, res: any, next: any) => {
       return res.status(401).json({ error: "UID missing from user session" });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: uid },
-    });
+    const user = await findUser(undefined, uid);
 
     if (!user) {
-      console.log("User not found in database");
-      return res.status(401).json({ error: "User not found in database" });
+      console.log(`User with UID ${uid} not found in database`);
+      return res.status(401).json({ error: "User not found" });
     }
 
     next();
@@ -31,4 +30,3 @@ const authenticate = async (req: reqUser, res: any, next: any) => {
   }
 };
 
-export default authenticate;

@@ -4,7 +4,7 @@ import authRoutes from "./routes/authRoutes";
 import session from "express-session";
 import redisClient from "./config/redis";
 import { RedisStore } from "connect-redis";
-import authenticate from "./middleware/authenticate";
+import { authenticate } from "./middleware/authenticate";
 import userRoutes from "./routes/userRoutes";
 import { reqUser } from "./types";
 
