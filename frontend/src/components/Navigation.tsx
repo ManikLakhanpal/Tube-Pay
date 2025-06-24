@@ -3,33 +3,37 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { Menu, X, User, Home, Video, Info, LogOut } from 'lucide-react';
+import { Menu, X, User, Home, Video, Info, LogOut, LogIn } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { authAPI } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { user, logout } = useAuth();
 
   const handleLogout = async () => {
-    await authAPI.logout();
-    window.location.href = '/';
+    await logout();
   };
 
   const navItems = [
     { href: '/', label: 'Home', icon: Home },
     { href: '/streams', label: 'Streams', icon: Video },
-    { href: '/profile', label: 'Profile', icon: User },
     { href: '/about', label: 'About', icon: Info },
   ];
 
+  // Add profile link only if user is authenticated
+  if (user) {
+    navItems.push({ href: '/profile', label: 'Profile', icon: User });
+  }
+
   return (
-    <nav className="bg-black text-white shadow-lg">
+    <nav className="bg-black/80 text-white shadow-lg sticky top-0 left-0 right-0 z-50 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
+        <div className="flex justify-between h-16"> 
           <div className="flex items-center">
             <Link href="/" className="flex-shrink-0 flex items-center">
-              <span className="text-xl font-bold">YouTube Donations</span>
+              <span className="text-xl font-bold">Tube Pay</span>
             </Link>
           </div>
 
@@ -53,13 +57,24 @@ export default function Navigation() {
                 </Link>
               );
             })}
-            <button
-              onClick={handleLogout}
-              className="flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
-            >
-              <LogOut className="h-4 w-4" />
-              <span>Logout</span>
-            </button>
+            
+            {user ? (
+              <button
+                onClick={handleLogout}
+                className="flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Logout</span>
+              </button>
+            ) : (
+              <Link
+                href="/signin"
+                className="flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
+              >
+                <LogIn className="h-4 w-4" />
+                <span>Sign In</span>
+              </Link>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -101,16 +116,28 @@ export default function Navigation() {
                 </Link>
               );
             })}
-            <button
-              onClick={() => {
-                handleLogout();
-                setIsMenuOpen(false);
-              }}
-              className="flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800 transition-colors w-full"
-            >
-              <LogOut className="h-5 w-5" />
-              <span>Logout</span>
-            </button>
+            
+            {user ? (
+              <button
+                onClick={() => {
+                  handleLogout();
+                  setIsMenuOpen(false);
+                }}
+                className="flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800 transition-colors w-full"
+              >
+                <LogOut className="h-5 w-5" />
+                <span>Logout</span>
+              </button>
+            ) : (
+              <Link
+                href="/signin"
+                className="flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800 transition-colors w-full"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <LogIn className="h-5 w-5" />
+                <span>Sign In</span>
+              </Link>
+            )}
           </div>
         </div>
       )}

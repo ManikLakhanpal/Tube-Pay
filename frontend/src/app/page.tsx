@@ -1,29 +1,47 @@
-import Link from 'next/link';
-import { Button } from '@/components/ui/Button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Video, Users, DollarSign, Heart } from 'lucide-react';
+import Link from "next/link";
+import { Button } from "@/components/ui/Button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/Card";
+import { Video, Users, DollarSign, Heart } from "lucide-react";
 
 export default function Home() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="bg-black text-white py-20">
+      <section className="bg-black text-white py-20 h-screen flex items-center justify-center">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              YouTube Donations
-            </h1>
+            <span className="flex items-center justify-center">
+              <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse mr-2"></div>
+              <span className="text-sm">LIVE</span>
+            </span>
+            <h1 className="text-4xl md:text-6xl font-bold mb-6">Tube Pay</h1>
             <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto">
-              Streamline your YouTube streaming experience with seamless donation management and real-time interactions.
+              Streamline your YouTube streaming experience with seamless
+              donation management and real-time interactions.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/streams">
-                <Button size="lg" variant="secondary">
-                  Browse Streams
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  className="bg-white text-black hover:bg-gray-200 hover:cursor-pointer"
+                >
+                  <Video className="w-6 h-6 mr-2" />
+                  <span className="text-sm">Browse Streams</span>
                 </Button>
               </Link>
               <Link href="/signin">
-                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-black">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white text-white hover:bg-white hover:text-black hover:cursor-pointer"
+                >
                   Get Started
                 </Button>
               </Link>
@@ -37,10 +55,11 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-black mb-4">
-              Why Choose YouTube Donations?
+              Why Choose Tube Pay?
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Our platform provides everything you need to manage your streaming career and connect with your audience.
+              Our platform provides everything you need to manage your streaming
+              career and connect with your audience.
             </p>
           </div>
 
@@ -54,7 +73,8 @@ export default function Home() {
               </CardHeader>
               <CardContent>
                 <CardDescription>
-                  Create and manage your live streams with ease. Track viewer engagement and donations in real-time.
+                  Create and manage your live streams with ease. Track viewer
+                  engagement and donations in real-time.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -68,7 +88,8 @@ export default function Home() {
               </CardHeader>
               <CardContent>
                 <CardDescription>
-                  Receive and manage donations from your viewers with secure payment processing and instant notifications.
+                  Receive and manage donations from your viewers with secure
+                  payment processing and instant notifications.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -82,7 +103,8 @@ export default function Home() {
               </CardHeader>
               <CardContent>
                 <CardDescription>
-                  Build a strong community around your content with interactive features and viewer engagement tools.
+                  Build a strong community around your content with interactive
+                  features and viewer engagement tools.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -96,7 +118,8 @@ export default function Home() {
               </CardHeader>
               <CardContent>
                 <CardDescription>
-                  Dedicated support for content creators with analytics, insights, and growth tools to help you succeed.
+                  Dedicated support for content creators with analytics,
+                  insights, and growth tools to help you succeed.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -111,12 +134,11 @@ export default function Home() {
             Ready to Start Your Streaming Journey?
           </h2>
           <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-            Join thousands of creators who trust YouTube Donations to manage their streaming business.
+            Join thousands of creators who trust Tube Pay to manage their
+            streaming business.
           </p>
           <Link href="/signin">
-            <Button size="lg">
-              Sign In with Google
-            </Button>
+            <Button size="lg">Sign In with Google</Button>
           </Link>
         </div>
       </section>

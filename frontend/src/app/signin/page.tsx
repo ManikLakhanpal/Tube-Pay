@@ -4,14 +4,37 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
-import { authAPI } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function SignIn() {
   const router = useRouter();
+  const { user, loading } = useAuth();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (user && !loading) {
+      router.push('/');
+    }
+  }, [user, loading, router]);
 
   const handleGoogleSignIn = () => {
-    window.location.href = authAPI.googleLogin();
+    window.location.href = 'http://localhost:5000/api/auth/google';
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (user) {
+    return null; // Will redirect due to useEffect
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -19,7 +42,7 @@ export default function SignIn() {
         <div className="text-center">
           <h1 className="text-3xl font-bold text-black">Welcome Back</h1>
           <p className="mt-2 text-gray-600">
-            Sign in to your YouTube Donations account
+            Sign in to your Tube Pay account
           </p>
         </div>
 
@@ -60,11 +83,11 @@ export default function SignIn() {
             <div className="text-center">
               <p className="text-sm text-gray-600">
                 By signing in, you agree to our{' '}
-                <a href="#" className="text-black hover:underline">
+                <a className="text-black hover:underline hover:cursor-pointer">
                   Terms of Service
                 </a>{' '}
                 and{' '}
-                <a href="#" className="text-black hover:underline">
+                <a className="text-black hover:underline hover:cursor-pointer">
                   Privacy Policy
                 </a>
               </p>
@@ -77,7 +100,7 @@ export default function SignIn() {
             Don't have an account?{' '}
             <button
               onClick={handleGoogleSignIn}
-              className="text-black hover:underline font-medium"
+              className="text-black hover:underline font-medium hover:cursor-pointer"
             >
               Sign up with Google
             </button>

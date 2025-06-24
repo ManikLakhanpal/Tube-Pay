@@ -6,6 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { userAPI } from '@/lib/api';
 import { User } from '@/types';
 import { User as UserIcon, Edit, Video, DollarSign, Calendar } from 'lucide-react';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
@@ -16,29 +18,31 @@ export default function ProfilePage() {
     avatarUrl: '',
     role: ''
   });
+  const { user: authUser } = useAuth();
 
   useEffect(() => {
     const fetchUser = async () => {
-      try {
-        // For now, we'll use a mock user ID. In a real app, you'd get this from auth context
-        const userData = await userAPI.getProfile('mock-user-id');
-        if (userData) {
-          setUser(userData);
-          setFormData({
-            name: userData.name,
-            avatarUrl: userData.avatarUrl || '',
-            role: userData.role
-          });
+      if (authUser?.uid) {
+        try {
+          const userData = await userAPI.getProfile(authUser.uid);
+          if (userData) {
+            setUser(userData);
+            setFormData({
+              name: userData.name,
+              avatarUrl: userData.avatarUrl || '',
+              role: userData.role
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching user:', error);
+        } finally {
+          setLoading(false);
         }
-      } catch (error) {
-        console.error('Error fetching user:', error);
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchUser();
-  }, []);
+  }, [authUser]);
 
   const handleSave = async () => {
     try {
@@ -83,172 +87,174 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-black">Profile</h1>
-          <p className="text-gray-600 mt-2">Manage your account and preferences</p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Profile Info */}
-          <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Profile Information</CardTitle>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsEditing(!isEditing)}
-                  >
-                    <Edit className="h-4 w-4 mr-2" />
-                    {isEditing ? 'Cancel' : 'Edit'}
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {isEditing ? (
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Name
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Avatar URL
-                      </label>
-                      <input
-                        type="url"
-                        value={formData.avatarUrl}
-                        onChange={(e) => setFormData({ ...formData, avatarUrl: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-                        placeholder="https://example.com/avatar.jpg"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Role
-                      </label>
-                      <select
-                        value={formData.role}
-                        onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-                      >
-                        <option value="USER">User</option>
-                        <option value="STREAMER">Streamer</option>
-                        <option value="ADMIN">Admin</option>
-                      </select>
-                    </div>
-                    <div className="flex space-x-2">
-                      <Button onClick={handleSave}>Save Changes</Button>
-                      <Button variant="outline" onClick={() => setIsEditing(false)}>
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
-                        {user.avatarUrl ? (
-                          <img
-                            src={user.avatarUrl}
-                            alt={user.name}
-                            className="w-16 h-16 rounded-full object-cover"
-                          />
-                        ) : (
-                          <UserIcon className="h-8 w-8 text-gray-600" />
-                        )}
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-semibold text-black">{user.name}</h3>
-                        <p className="text-gray-600">{user.email}</p>
-                        <span className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full mt-1">
-                          {user.role}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="text-gray-600">Member since:</span>
-                        <p className="font-medium">
-                          {new Date(user.createdAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Role:</span>
-                        <p className="font-medium capitalize">{user.role.toLowerCase()}</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gray-50 py-12">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-black">Profile</h1>
+            <p className="text-gray-600 mt-2">Manage your account and preferences</p>
           </div>
 
-          {/* Stats */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Stats</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Profile Info */}
+            <div className="lg:col-span-2">
+              <Card>
+                <CardHeader>
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Video className="h-5 w-5 text-gray-600" />
-                      <span className="text-sm text-gray-600">Total Streams</span>
-                    </div>
-                    <span className="font-semibold">0</span>
+                    <CardTitle>Profile Information</CardTitle>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsEditing(!isEditing)}
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      {isEditing ? 'Cancel' : 'Edit'}
+                    </Button>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <DollarSign className="h-5 w-5 text-gray-600" />
-                      <span className="text-sm text-gray-600">Total Donations</span>
+                </CardHeader>
+                <CardContent>
+                  {isEditing ? (
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Name
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.name}
+                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Avatar URL
+                        </label>
+                        <input
+                          type="url"
+                          value={formData.avatarUrl}
+                          onChange={(e) => setFormData({ ...formData, avatarUrl: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                          placeholder="https://example.com/avatar.jpg"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Role
+                        </label>
+                        <select
+                          value={formData.role}
+                          onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                        >
+                          <option value="USER">User</option>
+                          <option value="STREAMER">Streamer</option>
+                          <option value="ADMIN">Admin</option>
+                        </select>
+                      </div>
+                      <div className="flex space-x-2">
+                        <Button onClick={handleSave}>Save Changes</Button>
+                        <Button variant="outline" onClick={() => setIsEditing(false)}>
+                          Cancel
+                        </Button>
+                      </div>
                     </div>
-                    <span className="font-semibold">$0</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Calendar className="h-5 w-5 text-gray-600" />
-                      <span className="text-sm text-gray-600">Days Active</span>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
+                          {user.avatarUrl ? (
+                            <img
+                              src={user.avatarUrl}
+                              alt={user.name}
+                              className="w-16 h-16 rounded-full object-cover"
+                            />
+                          ) : (
+                            <UserIcon className="h-8 w-8 text-gray-600" />
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-semibold text-black">{user.name}</h3>
+                          <p className="text-gray-600">{user.email}</p>
+                          <span className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full mt-1">
+                            {user.role}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <span className="text-gray-600">Member since:</span>
+                          <p className="font-medium">
+                            {new Date(user.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div>
+                          <span className="text-gray-600">Role:</span>
+                          <p className="font-medium capitalize">{user.role.toLowerCase()}</p>
+                        </div>
+                      </div>
                     </div>
-                    <span className="font-semibold">
-                      {Math.floor((Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24))}
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <Button variant="outline" className="w-full justify-start">
-                    <Video className="h-4 w-4 mr-2" />
-                    Create Stream
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <DollarSign className="h-4 w-4 mr-2" />
-                    View Donations
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Stats */}
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Quick Stats</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <Video className="h-5 w-5 text-gray-600" />
+                        <span className="text-sm text-gray-600">Total Streams</span>
+                      </div>
+                      <span className="font-semibold">0</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <DollarSign className="h-5 w-5 text-gray-600" />
+                        <span className="text-sm text-gray-600">Total Donations</span>
+                      </div>
+                      <span className="font-semibold">$0</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <Calendar className="h-5 w-5 text-gray-600" />
+                        <span className="text-sm text-gray-600">Days Active</span>
+                      </div>
+                      <span className="font-semibold">
+                        {Math.floor((Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24))}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <Button variant="outline" className="w-full justify-start">
+                      <Video className="h-4 w-4 mr-2" />
+                      Create Stream
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start">
+                      <DollarSign className="h-4 w-4 mr-2" />
+                      View Donations
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </ProtectedRoute>
   );
 } 

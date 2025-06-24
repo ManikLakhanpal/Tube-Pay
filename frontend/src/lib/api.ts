@@ -1,5 +1,6 @@
 import { User, Stream, Payment } from '@/types';
-import { API_BASE_URL } from './utils';
+
+const API_BASE_URL = 'http://localhost:5000/api';
 
 // Auth API
 export const authAPI = {

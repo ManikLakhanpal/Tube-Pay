@@ -6,7 +6,7 @@ export default function AboutPage() {
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-black mb-4">About YouTube Donations</h1>
+          <h1 className="text-4xl font-bold text-black mb-4">About Tube Pay</h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Empowering content creators to build sustainable careers through seamless donation management and community engagement.
           </p>
@@ -19,7 +19,7 @@ export default function AboutPage() {
           </CardHeader>
           <CardContent>
             <p className="text-gray-600 leading-relaxed">
-              YouTube Donations was created with a simple mission: to help content creators monetize their passion 
+              Tube Pay was created with a simple mission: to help content creators monetize their passion 
               and build meaningful connections with their audience. We believe that every creator deserves the tools 
               to turn their creativity into a sustainable career.
             </p>
@@ -136,7 +136,7 @@ export default function AboutPage() {
           <CardHeader>
             <CardTitle className="text-2xl">Our Team</CardTitle>
             <CardDescription>
-              Meet the passionate team behind YouTube Donations
+              Meet the passionate team behind Tube Pay
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -176,9 +176,9 @@ export default function AboutPage() {
               <div>
                 <h3 className="font-semibold text-lg mb-4">Contact Information</h3>
                 <div className="space-y-2 text-gray-600">
-                  <p>📧 Email: support@youtubedonations.com</p>
-                  <p>🌐 Website: youtubedonations.com</p>
-                  <p>📱 Social: @YouTubeDonations</p>
+                  <p>📧 Email: support@tubepay.com</p>
+                  <p>🌐 Website: tubepay.com</p>
+                  <p>📱 Social: @TubePay</p>
                 </div>
               </div>
               <div>
