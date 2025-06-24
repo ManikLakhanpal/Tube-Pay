@@ -8,9 +8,15 @@ import { authenticate } from "./middleware/authenticate";
 import userRoutes from "./routes/userRoutes";
 import streamRoutes from "./routes/streamRoutes";
 import { reqUser } from "./types";
+import cors from "cors";
 
 const app = express();
 const port = process.env.PORT!;
+
+app.use(cors({
+  origin: "http://localhost:3000",
+  credentials: true,
+}));
 
 app.use(
   session({
