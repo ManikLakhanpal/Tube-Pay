@@ -52,7 +52,7 @@ export default function StreamDetailPage() {
             <Video className="mx-auto h-12 w-12 text-gray-400 mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">Stream not found</h3>
             <p className="text-gray-600 mb-6">
-              The stream you're looking for doesn't exist or has been removed.
+              The stream you&apos;re looking for doesn&apos;t exist or has been removed.
             </p>
             <Link href="/streams">
               <Button>Back to Streams</Button>

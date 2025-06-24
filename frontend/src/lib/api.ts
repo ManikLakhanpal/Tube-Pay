@@ -1,4 +1,4 @@
-import { User, Stream, Payment } from '@/types';
+import { User, Stream } from '@/types';
 
 const API_BASE_URL = 'http://localhost:5000/api';
 

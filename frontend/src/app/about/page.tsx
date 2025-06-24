@@ -42,7 +42,7 @@ export default function AboutPage() {
             <CardContent>
               <CardDescription>
                 We put creators first. Our platform is designed to maximize your earnings while providing 
-                the best experience for your audience. Every feature is built with creators' needs in mind.
+                the best experience for your audience. Every feature is built with creators&apos; needs in mind.
               </CardDescription>
             </CardContent>
           </Card>
@@ -106,7 +106,7 @@ export default function AboutPage() {
                 </div>
                 <h3 className="font-semibold text-lg mb-2">Sign Up</h3>
                 <p className="text-gray-600">
-                  Create your account using your Google account. It's quick, secure, and free to get started.
+                  Create your account using your Google account. It&apos;s quick, secure, and free to get started.
                 </p>
               </div>
               <div className="text-center">
@@ -136,7 +136,7 @@ export default function AboutPage() {
           <CardHeader>
             <CardTitle className="text-2xl">Our Team</CardTitle>
             <CardDescription>
-              Meet the passionate team behind Tube Pay
+              Meet the passionate team behind YouTube Donations
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -168,7 +168,7 @@ export default function AboutPage() {
           <CardHeader>
             <CardTitle className="text-2xl">Get in Touch</CardTitle>
             <CardDescription>
-              Have questions or suggestions? We'd love to hear from you!
+              Have questions or suggestions? We&apos;d love to hear from you!
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -176,9 +176,9 @@ export default function AboutPage() {
               <div>
                 <h3 className="font-semibold text-lg mb-4">Contact Information</h3>
                 <div className="space-y-2 text-gray-600">
-                  <p>📧 Email: support@tubepay.com</p>
-                  <p>🌐 Website: tubepay.com</p>
-                  <p>📱 Social: @TubePay</p>
+                  <p>📧 Email: support@youtubedonations.com</p>
+                  <p>🌐 Website: youtubedonations.com</p>
+                  <p>📱 Social: @YouTubeDonations</p>
                 </div>
               </div>
               <div>
