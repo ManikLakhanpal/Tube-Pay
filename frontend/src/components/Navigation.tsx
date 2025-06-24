@@ -47,9 +47,11 @@ export default function Navigation() {
                   href={item.href}
                   className={cn(
                     "flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                    pathname === item.href
+                    pathname === item.href || 
+                      (item.href === '/profile' && pathname.startsWith('/profile')) || 
+                      (item.href === '/streams' && pathname.startsWith('/streams'))
                       ? "bg-white text-black"
-                      : "text-gray-300 hover:text-white hover:bg-gray-800"
+                      : "text-gray-300 hover:text-black hover:bg-white"
                   )}
                 >
                   <Icon className="h-4 w-4" />
