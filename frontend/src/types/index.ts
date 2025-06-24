@@ -17,6 +17,7 @@ export interface Stream {
   streamer: User;
   streamerId: string;
   createdAt: string;
+  payments?: Payment[];
 }
 
 export interface Payment {

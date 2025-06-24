@@ -1,10 +1,10 @@
 import { User, Stream } from '@/types';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // Auth API
 export const authAPI = {
-  googleLogin: () => `${API_BASE_URL}/auth/google`,
+  googleLogin: () => `${API_BASE_URL}/api/auth/google`,
   logout: async () => {
     const response = await fetch(`${API_BASE_URL}/auth/logout`, {
       method: 'DELETE',
@@ -18,14 +18,14 @@ export const authAPI = {
 export const userAPI = {
   getProfile: async (id: string): Promise<User | null> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/user/profile/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/user/profile/${id}`, {
         credentials: 'include',
       });
       if (!response.ok) return null;
 
       return response.json();
     } catch (error) {
-      
+
       console.error('Error fetching user profile:', error);
       return null;
     }
@@ -33,7 +33,7 @@ export const userAPI = {
 
   updateProfile: async (data: { name?: string; avatarUrl?: string; role?: string }): Promise<User | null> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/user/profile`, {
+      const response = await fetch(`${API_BASE_URL}/api/user/profile`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -54,7 +54,7 @@ export const userAPI = {
 export const streamAPI = {
   getLiveStreams: async (): Promise<Stream[]> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/streams/live`, {
+      const response = await fetch(`${API_BASE_URL}/api/streams/live`, {
         credentials: 'include',
       });
       if (!response.ok) return [];
@@ -67,7 +67,7 @@ export const streamAPI = {
 
   getStreamById: async (id: string): Promise<Stream | null> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/streams/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/streams/${id}`, {
         credentials: 'include',
       });
       if (!response.ok) return null;
@@ -80,7 +80,7 @@ export const streamAPI = {
 
   createStream: async (data: { title: string; description?: string; streamLink?: string }): Promise<Stream | null> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/streams`, {
+      const response = await fetch(`${API_BASE_URL}/api/streams`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -98,7 +98,7 @@ export const streamAPI = {
 
   updateStream: async (id: string, data: { title?: string; description?: string; streamLink?: string; isLive?: boolean }): Promise<Stream | null> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/streams/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/streams/${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -116,7 +116,7 @@ export const streamAPI = {
 
   deleteStream: async (id: string): Promise<boolean> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/streams/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/streams/${id}`, {
         method: 'DELETE',
         credentials: 'include',
       });

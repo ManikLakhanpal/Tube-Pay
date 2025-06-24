@@ -9,12 +9,25 @@ import userRoutes from "./routes/userRoutes";
 import streamRoutes from "./routes/streamRoutes";
 import { reqUser } from "./types";
 import cors from "cors";
+import os from "os";
 
 const app = express();
 const port = process.env.PORT!;
 
+const allowedOrigins = [
+  `${process.env.FRONTEND_URL}`,
+  "http://192.168.1.58:3000",
+];
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:3000",
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      // TODO: Remove this, throw error later
+      callback(null, true);
+    }
+  },
   credentials: true,
 }));
 
@@ -59,5 +72,21 @@ app.get('/test', authenticate, (req: reqUser, res: any) => {
 })
 
 app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
-})
+  const interfaces = os.networkInterfaces();
+  const addresses: string[] = [];
+
+  for (const iface of Object.values(interfaces)) {
+    if (!iface) continue;
+    for (const config of iface) {
+      if (config.family === "IPv4" && !config.internal) {
+        addresses.push(config.address);
+      }
+    }
+  }
+
+  console.log(`✓ Server started`);
+  console.log(`- Local: http://localhost:${port}`);
+  addresses.forEach(addr => {
+    console.log(`- Network: http://${addr}:${port}`);
+  });
+});

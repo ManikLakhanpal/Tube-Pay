@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { userAPI, streamAPI } from "@/lib/api";
-import { User } from "@/types";
+import { Stream, User } from "@/types";
 import {
   User as UserIcon,
   Edit,
@@ -392,6 +392,47 @@ export default function ProfileView({ userId }: { userId?: string }) {
                 )}
               </CardContent>
             </Card>
+
+            {/* User Streams List */}
+            <div className="mt-8">
+              <h2 className="text-xl font-bold mb-4 text-black">Streams</h2>
+              {user.streams && user.streams.length > 0 ? (
+                <div className="space-y-4">
+                  {user.streams.map((stream: Stream) => (
+                    <div
+                      key={stream.id}
+                      className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <div>
+                          <h3 className="text-lg font-semibold text-black">{stream.title}</h3>
+                          <p className="text-gray-600 text-sm mb-1 line-clamp-2">{stream.description}</p>
+                          {stream.streamLink && (
+                            <a
+                              href={stream.streamLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline text-sm"
+                            >
+                              Watch Stream
+                            </a>
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-2 sm:mt-0">
+                          {stream.createdAt && (
+                            <span>
+                              {new Date(stream.createdAt).toLocaleString()}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-gray-500 text-sm">No streams yet.</div>
+              )}
+            </div>
           </div>
 
           {/* Stats */}

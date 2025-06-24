@@ -25,7 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkAuth = async () => {
     try {
-      const response = await fetch("http://localhost:5000/", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/`, {
         credentials: "include",
       });
 
@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const left = window.screenX + (window.outerWidth - width) / 2;
       const top = window.screenY + (window.outerHeight - height) / 2;
       const popup = window.open(
-        "http://localhost:5000/api/auth/google",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`,
         "googleSignIn",
         `width=${width},height=${height},left=${left},top=${top}`
       );
@@ -66,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const pollAuth = async () => {
         try {
-          const response = await fetch("http://localhost:5000/", {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/`, {
             credentials: "include",
           });
           if (response.ok) {
@@ -87,6 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           reject(new Error("Popup closed by user"));
         }
       };
+
       const pollTimer: NodeJS.Timeout = setInterval(pollAuth, 10);
     });
   };
@@ -94,7 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     if (window.confirm("Are you sure you want to logout?")) {
       try {
-        await fetch("http://localhost:5000/api/auth/logout", {
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`, {
           method: "DELETE",
           credentials: "include",
         });

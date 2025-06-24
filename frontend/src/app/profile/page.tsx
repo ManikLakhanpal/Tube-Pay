@@ -9,6 +9,10 @@ export default function ProfilePage() {
   const router = useRouter();
 
   useEffect(() => {
+    if (!user) {
+      router.replace("/signin");
+    }
+
     if (!loading && user?.uid) {
       router.replace(`/profile/${user.uid}`);
     }
