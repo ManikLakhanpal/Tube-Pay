@@ -22,8 +22,10 @@ export const userAPI = {
         credentials: 'include',
       });
       if (!response.ok) return null;
+
       return response.json();
     } catch (error) {
+      
       console.error('Error fetching user profile:', error);
       return null;
     }

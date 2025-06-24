@@ -44,7 +44,7 @@ router.delete("/logout", (req: reqUser, res: any) => {
     }
   });
   
-  res.redirect("/");
+  res.status(200).json({ message: "Logged out successfully" });
 });
 
 export default router;

@@ -88,6 +88,22 @@ export const getStreamById = async (streamId: string) => {
             avatarUrl: true,
           },
         },
+        payments: {
+          select: {
+            id: true,
+            amount: true,
+            createdAt: true,
+            message: true,
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                avatarUrl: true,
+              },
+            },
+          },
+        },
       },
     });
     return stream;

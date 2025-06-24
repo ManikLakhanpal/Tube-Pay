@@ -1,10 +1,19 @@
-import ProfileView from "./ProfileView";
-import ProtectedRoute from "@/components/ProtectedRoute";
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function ProfilePage() {
-  return (
-    <ProtectedRoute>
-      <ProfileView />
-    </ProtectedRoute>
-  );
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && user?.uid) {
+      router.replace(`/profile/${user.uid}`);
+    }
+  }, [user, loading, router]);
+
+  // Optionally, show a loading spinner or nothing while redirecting
+  return null;
 } 

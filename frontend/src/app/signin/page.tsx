@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function SignIn() {
   const router = useRouter();
-  const { user, loading } = useAuth();
+  const { user, loading, signIn } = useAuth();
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -16,10 +16,6 @@ export default function SignIn() {
       router.push('/');
     }
   }, [user, loading, router]);
-
-  const handleGoogleSignIn = () => {
-    window.location.href = 'http://localhost:5000/api/auth/google';
-  };
 
   if (loading) {
     return (
@@ -55,7 +51,7 @@ export default function SignIn() {
           </CardHeader>
           <CardContent className="space-y-4">
             <Button
-              onClick={handleGoogleSignIn}
+              onClick={() => {signIn()}}
               className="w-full flex items-center justify-center space-x-2"
               size="lg"
             >
@@ -99,7 +95,7 @@ export default function SignIn() {
           <p className="text-sm text-gray-600">
             Don&apos;t have an account?{' '}
             <button
-              onClick={handleGoogleSignIn}
+              onClick={() => {signIn()}}
               className="text-black hover:underline font-medium hover:cursor-pointer"
             >
               Sign up with Google

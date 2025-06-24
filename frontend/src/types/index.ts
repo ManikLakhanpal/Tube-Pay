@@ -5,6 +5,7 @@ export interface User {
   avatarUrl?: string;
   role: 'ADMIN' | 'STREAMER' | 'USER';
   createdAt: string;
+  streams: Stream[];
 }
 
 export interface Stream {

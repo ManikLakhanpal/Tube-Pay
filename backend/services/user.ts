@@ -5,12 +5,16 @@ const userSelectFields = {
   name: true,
   email: true,
   role: true,
+  createdAt: true,
+  avatarUrl: true,
   streams: {
     select: {
       id: true,
       title: true,
       description: true,
       isLive: true,
+      streamLink: true,
+      streamerId: true,
       createdAt: true,
     },
   },

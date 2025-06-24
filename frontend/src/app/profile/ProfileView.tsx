@@ -224,7 +224,7 @@ export default function ProfileView({ userId }: { userId?: string }) {
                       <Video className="h-5 w-5 text-gray-600" />
                       <span className="text-sm text-gray-600">Total Streams</span>
                     </div>
-                    <span className="font-semibold">0</span>
+                    <span className="font-semibold">{user.streams.length}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">

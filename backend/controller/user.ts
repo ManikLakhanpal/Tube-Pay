@@ -27,7 +27,7 @@ export const loginUser = async (req: reqUser, res: any) => {
     }
 
     // * Step 3: Return the user
-    return res.redirect("/");
+    res.status(200).json(user);
 
   } catch (error) {
     console.error("Error logging in user:", error);
