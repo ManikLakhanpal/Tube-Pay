@@ -110,7 +110,7 @@ export default function StreamDetailPage() {
       if (!stream) throw new Error('Stream not loaded');
       await streamAPI.deleteStream(stream.id);
       setEditSuccess('Stream deleted!');
-      router.push('/streams');
+      router.push('/profile');
     } catch (err) {
       console.error('Error deleting stream:', err);
       setEditError('Failed to delete stream.');
@@ -384,7 +384,7 @@ export default function StreamDetailPage() {
                 type="text"
                 value={editForm.title}
                 onChange={e => setEditForm({ ...editForm, title: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                className="w-full px-3 py-2 border text-black placeholder:text-gray-500 border-gray-300 rounded-md"
                 placeholder="Stream Title"
                 required
               />
@@ -394,7 +394,7 @@ export default function StreamDetailPage() {
               <textarea
                 value={editForm.description}
                 onChange={e => setEditForm({ ...editForm, description: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                className="w-full px-3 py-2 border text-black placeholder:text-gray-500 border-gray-300 rounded-md"
                 rows={2}
                 placeholder="Stream Description"
               />
@@ -405,7 +405,7 @@ export default function StreamDetailPage() {
                 type="url"
                 value={editForm.streamLink}
                 onChange={e => setEditForm({ ...editForm, streamLink: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                className="w-full px-3 py-2 border text-black placeholder:text-gray-500 border-gray-300 rounded-md"
                 placeholder="https://youtube.com/..."
               />
             </div>
@@ -414,7 +414,7 @@ export default function StreamDetailPage() {
               <select
                 value={editForm.isLive ? 'live' : 'complete'}
                 onChange={e => setEditForm({ ...editForm, isLive: e.target.value === 'live' })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                className="w-full px-3 py-2 border text-black placeholder:text-gray-500 border-gray-300 rounded-md"
               >
                 <option value="live">Live</option>
                 <option value="complete">Complete</option>
@@ -425,7 +425,7 @@ export default function StreamDetailPage() {
             <div className="flex space-x-2">
               <Button type="submit" disabled={saving}>{saving ? 'Saving...' : 'Save Changes'}</Button>
               <Button variant="outline" type="button" onClick={() => setShowEditModal(false)}>Cancel</Button>
-              <Button variant="outline" type="button" onClick={() => setShowDeleteConfirm(true)} disabled={deleting} className="border-red-500 text-red-600 hover:bg-red-50">
+              <Button variant="outline" type="button" onClick={() => setShowDeleteConfirm(true)} disabled={deleting} className="border-red-500 text-red-600 hover:bg-red-500 hover:text-white hover:cursor-pointer">
                 Delete Stream
               </Button>
             </div>
@@ -438,7 +438,7 @@ export default function StreamDetailPage() {
             <p className="text-gray-700">Are you sure you want to delete this stream? This action cannot be undone.</p>
             {editError && <div className="text-red-600 text-sm">{editError}</div>}
             <div className="flex space-x-2">
-              <Button variant="outline" onClick={handleDelete} disabled={deleting} className="border-red-500 text-red-600 hover:bg-red-50">{deleting ? 'Deleting...' : 'Delete'}</Button>
+              <Button variant="outline" onClick={handleDelete} disabled={deleting} className="border-red-500 text-red-600 hover:bg-red-500 hover:text-white hover:cursor-pointer">{deleting ? 'Deleting...' : 'Delete'}</Button>
               <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>Cancel</Button>
             </div>
           </div>
