@@ -2,17 +2,53 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/Card";
-import { userAPI } from "@/lib/api";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { userAPI, streamAPI } from "@/lib/api";
 import { User } from "@/types";
-import { User as UserIcon, Edit, Video, DollarSign, Calendar } from "lucide-react";
+import {
+  User as UserIcon,
+  Edit,
+  Video,
+  DollarSign,
+  Calendar,
+} from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import Image from "next/image";
+
+// Modal component
+function Modal({
+  open,
+  onClose,
+  children,
+}: {
+  open: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
+  if (!open) return null;
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-gray-500/80"
+      style={{ touchAction: "none" }}
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-lg shadow-lg p-4 sm:p-6 w-11/12 max-w-xs sm:max-w-md relative z-50 pointer-events-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          className="absolute top-2 right-2 text-gray-400 hover:text-black text-xl font-bold"
+          onClick={onClose}
+          aria-label="Close"
+          type="button"
+        >
+          ×
+        </button>
+        {children}
+      </div>
+    </div>
+  );
+}
 
 export default function ProfileView({ userId }: { userId?: string }) {
   const [user, setUser] = useState<User | null>(null);
@@ -25,6 +61,17 @@ export default function ProfileView({ userId }: { userId?: string }) {
   });
   const { user: authUser } = useAuth();
   const isOwnProfile = !userId || (authUser && userId === authUser.uid);
+
+  // Create Stream state
+  const [showCreateStream, setShowCreateStream] = useState(false);
+  const [streamForm, setStreamForm] = useState({
+    title: "",
+    description: "",
+    streamLink: "",
+  });
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState("");
+  const [createSuccess, setCreateSuccess] = useState("");
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -64,6 +111,41 @@ export default function ProfileView({ userId }: { userId?: string }) {
     }
   };
 
+  // Create Stream logic
+  const canCreateStream = isOwnProfile && user?.role === "STREAMER";
+  const handleCreateStream = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreating(true);
+    setCreateError("");
+    setCreateSuccess("");
+    try {
+      const newStream = await streamAPI.createStream({
+        title: streamForm.title,
+        description: streamForm.description,
+        streamLink: streamForm.streamLink,
+      });
+      if (newStream) {
+        setCreateSuccess("Stream created successfully!");
+        setStreamForm({ title: "", description: "", streamLink: "" });
+        setShowCreateStream(false);
+        setUser((prev) =>
+          prev
+            ? { ...prev, streams: [newStream, ...(prev.streams || [])] }
+            : prev
+        );
+      } else {
+        setCreateError(
+          "Failed to create stream. Make sure you are a streamer."
+        );
+      }
+    } catch (err) {
+      console.log(err);
+      setCreateError("Failed to create stream. Make sure you are a streamer.");
+    } finally {
+      setCreating(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 py-12">
@@ -83,10 +165,10 @@ export default function ProfileView({ userId }: { userId?: string }) {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <UserIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Profile not found</h3>
-            <p className="text-gray-600 mb-6">
-              Unable to load this profile.
-            </p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              Profile not found
+            </h3>
+            <p className="text-gray-600 mb-6">Unable to load this profile.</p>
           </div>
         </div>
       </div>
@@ -99,9 +181,94 @@ export default function ProfileView({ userId }: { userId?: string }) {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-black">Profile</h1>
           <p className="text-gray-600 mt-2">
-            {isOwnProfile ? "Manage your account and preferences" : `Viewing ${user.name}'s profile`}
+            {isOwnProfile
+              ? "Manage your account and preferences"
+              : `Viewing ${user.name}'s profile`}
           </p>
         </div>
+
+        {/* Create Stream Button and Modal */}
+        {canCreateStream && (
+          <div className="mb-8">
+            <Modal
+              open={showCreateStream}
+              onClose={() => setShowCreateStream(false)}
+            >
+              <form onSubmit={handleCreateStream} className="space-y-4">
+                <h2 className="text-xl text-black font-bold mb-2">
+                  Create Stream
+                </h2>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Title
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={streamForm.title}
+                    onChange={(e) =>
+                      setStreamForm({ ...streamForm, title: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border placeholder:text-gray-500 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+                    placeholder="Stream Title"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Description
+                  </label>
+                  <textarea
+                    value={streamForm.description}
+                    onChange={(e) =>
+                      setStreamForm({
+                        ...streamForm,
+                        description: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 border placeholder:text-gray-500 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+                    rows={2}
+                    placeholder="Stream Description"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Stream Link (YouTube, etc.)
+                  </label>
+                  <input
+                    type="url"
+                    value={streamForm.streamLink}
+                    onChange={(e) =>
+                      setStreamForm({
+                        ...streamForm,
+                        streamLink: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 border placeholder:text-gray-500 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+                    placeholder="https://youtube.com/..."
+                  />
+                </div>
+                {createError && (
+                  <div className="text-red-600 text-sm">{createError}</div>
+                )}
+                {createSuccess && (
+                  <div className="text-green-600 text-sm">{createSuccess}</div>
+                )}
+                <div className="flex space-x-2">
+                  <Button type="submit" disabled={creating}>
+                    {creating ? "Creating..." : "Create Stream"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    type="button"
+                    onClick={() => setShowCreateStream(false)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </Modal>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Profile Info */}
@@ -132,7 +299,9 @@ export default function ProfileView({ userId }: { userId?: string }) {
                       <input
                         type="text"
                         value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, name: e.target.value })
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
                       />
                     </div>
@@ -143,7 +312,12 @@ export default function ProfileView({ userId }: { userId?: string }) {
                       <input
                         type="url"
                         value={formData.avatarUrl}
-                        onChange={(e) => setFormData({ ...formData, avatarUrl: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            avatarUrl: e.target.value,
+                          })
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
                         placeholder="https://example.com/avatar.jpg"
                       />
@@ -154,7 +328,9 @@ export default function ProfileView({ userId }: { userId?: string }) {
                       </label>
                       <select
                         value={formData.role}
-                        onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, role: e.target.value })
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
                       >
                         <option value="USER">User</option>
@@ -164,7 +340,10 @@ export default function ProfileView({ userId }: { userId?: string }) {
                     </div>
                     <div className="flex space-x-2">
                       <Button onClick={handleSave}>Save Changes</Button>
-                      <Button variant="outline" onClick={() => setIsEditing(false)}>
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsEditing(false)}
+                      >
                         Cancel
                       </Button>
                     </div>
@@ -186,7 +365,9 @@ export default function ProfileView({ userId }: { userId?: string }) {
                         )}
                       </div>
                       <div>
-                        <h3 className="text-xl font-semibold text-black">{user.name}</h3>
+                        <h3 className="text-xl font-semibold text-black">
+                          {user.name}
+                        </h3>
                         <p className="text-gray-600">{user.email}</p>
                         <span className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full mt-1">
                           {user.role}
@@ -202,7 +383,9 @@ export default function ProfileView({ userId }: { userId?: string }) {
                       </div>
                       <div>
                         <span className="text-gray-600">Role:</span>
-                        <p className="font-medium capitalize">{user.role.toLowerCase()}</p>
+                        <p className="font-medium capitalize">
+                          {user.role.toLowerCase()}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -222,14 +405,18 @@ export default function ProfileView({ userId }: { userId?: string }) {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <Video className="h-5 w-5 text-gray-600" />
-                      <span className="text-sm text-gray-600">Total Streams</span>
+                      <span className="text-sm text-gray-600">
+                        Total Streams
+                      </span>
                     </div>
                     <span className="font-semibold">{user.streams.length}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <DollarSign className="h-5 w-5 text-gray-600" />
-                      <span className="text-sm text-gray-600">Total Donations</span>
+                      <span className="text-sm text-gray-600">
+                        Total Donations
+                      </span>
                     </div>
                     <span className="font-semibold">$0</span>
                   </div>
@@ -239,37 +426,48 @@ export default function ProfileView({ userId }: { userId?: string }) {
                       <span className="text-sm text-gray-600">Days Active</span>
                     </div>
                     <span className="font-semibold">
-                      {Math.floor((Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24))}
+                      {Math.floor(
+                        (Date.now() - new Date(user.createdAt).getTime()) /
+                          (1000 * 60 * 60 * 24)
+                      )}
                     </span>
                   </div>
                 </div>
               </CardContent>
             </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {isOwnProfile && (
-                    <Button variant="outline" className="w-full justify-start">
-                      <Video className="h-4 w-4 mr-2" />
-                      Create Stream
-                    </Button>
-                  )}
-                  {isOwnProfile && (
-                    <Button variant="outline" className="w-full justify-start">
-                      <DollarSign className="h-4 w-4 mr-2" />
-                      View Donations
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            {isOwnProfile && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {canCreateStream && (
+                      <Button
+                        variant="primary"
+                        className="w-full justify-start hover:cursor-pointer"
+                        onClick={() => setShowCreateStream(true)}
+                      >
+                        <Video className="h-4 w-4 mr-2" />
+                        Create Stream
+                      </Button>
+                    )}
+                    {isOwnProfile && (
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start hover:cursor-pointer hover:bg-green-500"
+                      >
+                        <DollarSign className="h-4 w-4 mr-2" />
+                        View Income
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </div>
     </div>
   );
-} 
+}
