@@ -15,7 +15,7 @@ export default function AuthCallback() {
         await checkAuth();
         
         // Redirect to home page after successful authentication
-        router.push('/');
+        router.push('/profile');
       } catch (error) {
         console.error('Authentication error:', error);
         router.push('/signin');
