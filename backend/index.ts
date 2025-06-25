@@ -16,7 +16,6 @@ const port = process.env.PORT!;
 
 const allowedOrigins = [
   `${process.env.FRONTEND_URL}`,
-  "http://192.168.1.58:3000",
 ];
 
 app.use(cors({

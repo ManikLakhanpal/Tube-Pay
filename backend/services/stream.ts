@@ -34,7 +34,7 @@ export const createStream = async (title: string, description: string | null, st
 /*
  *    Updates a stream by id, returns updated stream object or null on error
  */
-export const updateStream = async (streamId: string, updates: { title?: string; description?: string; streamLink?: string }) => {
+export const updateStream = async (streamId: string, updates: { title?: string; description?: string; streamLink?: string; isLive?: boolean }) => {
   try {
     const stream = await prisma.stream.update({
       where: { id: streamId },

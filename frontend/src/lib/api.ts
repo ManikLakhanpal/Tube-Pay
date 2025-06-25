@@ -96,7 +96,7 @@ export const streamAPI = {
     }
   },
 
-  updateStream: async (id: string, data: { title?: string; description?: string; streamLink?: string; isLive?: boolean }): Promise<Stream | null> => {
+  updateStream: async (id: string, data: { title?: string; description?: string; streamLink?: string; isLive?: string }): Promise<Stream | null> => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/streams/${id}`, {
         method: 'PATCH',
@@ -104,7 +104,12 @@ export const streamAPI = {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          title: data.title,
+          description: data.description,
+          streamLink: data.streamLink,
+          isLive: data.isLive ? "true" : "false",
+        }),
       });
       if (!response.ok) return null;
       return response.json();
