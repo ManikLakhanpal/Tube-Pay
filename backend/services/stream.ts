@@ -107,6 +107,9 @@ export const getStreamById = async (streamId: string) => {
               },
             },
           },
+          orderBy: {
+            createdAt: "desc",
+          }
         },
       },
     });
