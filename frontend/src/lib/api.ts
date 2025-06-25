@@ -1,4 +1,5 @@
-import { User, Stream } from '@/types';
+import { User, Stream, Order, Payment } from '@/types';
+
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -135,7 +136,7 @@ export const streamAPI = {
 
 // ! Payment API
 export const paymentAPI = {
-  createOrder: async (data: { amount: number; message?: string; streamId: string }): Promise<any> => {
+  createOrder: async (data: { amount: number; message?: string; streamId: string }): Promise<Order | null> => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/payment/order`, {
         method: 'POST',
@@ -153,7 +154,7 @@ export const paymentAPI = {
     }
   },
 
-  verifyPayment: async (data: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }): Promise<any> => {
+  verifyPayment: async (data: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }): Promise<Payment | null> => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/payment/verify`, {
         method: 'POST',

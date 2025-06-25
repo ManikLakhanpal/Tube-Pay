@@ -29,6 +29,15 @@ export interface Payment {
   stream: Stream;
   streamId: string;
   createdAt: string;
+  status: "PENDING" | "SUCCESS" | "FAILED";
+  success: boolean;
+}
+
+export interface Order {
+  id: string;
+  amount: number;
+  message?: string;
+  currency: string;
 }
 
 export interface AuthUser {
