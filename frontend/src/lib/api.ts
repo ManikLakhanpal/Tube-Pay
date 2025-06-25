@@ -2,7 +2,7 @@ import { User, Stream } from '@/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-// Auth API
+// ! Auth API
 export const authAPI = {
   googleLogin: () => `${API_BASE_URL}/api/auth/google`,
   logout: async () => {
@@ -14,7 +14,7 @@ export const authAPI = {
   },
 };
 
-// User API
+// ! User API
 export const userAPI = {
   getProfile: async (id: string): Promise<User | null> => {
     try {
@@ -50,7 +50,7 @@ export const userAPI = {
   },
 };
 
-// Stream API
+// ! Stream API
 export const streamAPI = {
   getLiveStreams: async (): Promise<Stream[]> => {
     try {
@@ -131,4 +131,44 @@ export const streamAPI = {
       return false;
     }
   },
+};
+
+// ! Payment API
+export const paymentAPI = {
+  createOrder: async (data: { amount: number; message?: string; streamId: string }): Promise<any> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/payment/order`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) return null;
+      return response.json();
+    } catch (error) {
+      console.error('Error creating payment order:', error);
+      return null;
+    }
+  },
+
+  verifyPayment: async (data: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }): Promise<any> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/payment/verify`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) return null;
+      return response.json();
+    } catch (error) {
+      console.error('Error verifying payment:', error);
+      return null;
+    }
+  },
 }; 
+

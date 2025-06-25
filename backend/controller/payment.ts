@@ -53,31 +53,33 @@ export const verifyOrderHandler = async (req: reqUser, res: any) => {
     req.body;
 
   console.log(req.body);
-  const hmac = crypto.createHmac("sha256", process.env.RAZORPAY_SECRET!);
+  const hmac = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!);
   hmac.update(razorpay_order_id + "|" + razorpay_payment_id);
   const generatedSignature = hmac.digest("hex");
 
   if (generatedSignature === razorpay_signature) {
-    console.log(
-      `Payment verification successful for payment id: ${razorpay_payment_id}`
-    );
 
     // * STEP 1: Get the payment
-    const payment = await getPayment(razorpay_payment_id);
+    const payment = await getPayment(razorpay_order_id);
 
     if (!payment) {
+      console.log(`Payment not found for order id: ${razorpay_order_id}`);
+
       return res
         .status(404)
         .send({ success: false, message: "Payment not found." });
     }
 
     // * STEP 2: Update the payment
-    await updatePayment(payment.id, "SUCCESS");
+    await updatePayment(razorpay_order_id, "SUCCESS");
 
+    console.log(`Payment verified successfully for payment id: ${razorpay_payment_id}`);
     res
       .status(200)
       .send({ success: true, message: "Payment verified successfully!" });
   } else {
+
+    console.log(`Payment verification failed for payment id: ${razorpay_payment_id}`);
     res
       .status(401)
       .send({ success: false, message: "Payment verification failed." });

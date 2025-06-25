@@ -164,7 +164,21 @@ export default function StreamDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
           <div className="lg:col-span-2 space-y-6">
             <LiveStreamCard streamLink={stream.streamLink} />
-            <SupportCreatorCard />
+            <SupportCreatorCard 
+              streamId={stream.id} 
+              onPaymentSuccess={() => {
+                // Refresh the stream data to show updated payments
+                const fetchStream = async () => {
+                  try {
+                    const streamData = await streamAPI.getStreamById(stream.id);
+                    setStream(streamData);
+                  } catch (error) {
+                    console.error("Error refreshing stream:", error);
+                  }
+                };
+                fetchStream();
+              }}
+            />
           </div>
           <div className="space-y-6">
             <AboutCreatorCard
