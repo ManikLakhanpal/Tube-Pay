@@ -75,7 +75,10 @@ export default function StreamDetailPage() {
     try {
       if (!stream) throw new Error("Stream not loaded");
       console.log("Sending update data:", editForm);
-      const updated = await streamAPI.updateStream(stream.id, editForm);
+      const updated = await streamAPI.updateStream(stream.id, {
+        ...editForm,
+        isLive: editForm.isLive.toString(),
+      });
       console.log("Received updated stream:", updated);
       if (updated) {
         setStream(updated);
