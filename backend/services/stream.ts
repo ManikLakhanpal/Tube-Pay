@@ -89,11 +89,15 @@ export const getStreamById = async (streamId: string) => {
           },
         },
         payments: {
+          where: {
+            status: "SUCCESS",
+          },
           select: {
             id: true,
             amount: true,
-            createdAt: true,
             message: true,
+            status: true,
+            createdAt: true,
             user: {
               select: {
                 id: true,

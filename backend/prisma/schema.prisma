@@ -44,6 +44,7 @@ model Payment {
   userId     String
   stream     Stream    @relation("StreamPayments", fields: [streamId], references: [id])
   streamId   String
+  status     PaymentStatus @default(PENDING)
   createdAt  DateTime  @default(now())
 }
 
@@ -51,4 +52,10 @@ enum Role {
   ADMIN
   STREAMER
   USER
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
 }

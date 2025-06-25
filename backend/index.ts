@@ -10,6 +10,7 @@ import streamRoutes from "./routes/streamRoutes";
 import { reqUser } from "./types";
 import cors from "cors";
 import os from "os";
+import paymentRoutes from "./routes/payment";
 
 const app = express();
 const port = process.env.PORT!;
@@ -55,6 +56,7 @@ app.use(passport.session());
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/streams', streamRoutes);
+app.use('/api/payment', paymentRoutes);
 
 app.get('/', (req: reqUser, res: any) => {
     if (req.user) {
