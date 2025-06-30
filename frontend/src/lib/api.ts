@@ -109,7 +109,7 @@ export const streamAPI = {
           title: data.title,
           description: data.description,
           streamLink: data.streamLink,
-          isLive: data.isLive ? "true" : "false",
+          isLive: data.isLive,
         }),
       });
       if (!response.ok) return null;

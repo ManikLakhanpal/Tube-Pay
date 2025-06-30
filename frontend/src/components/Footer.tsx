@@ -15,7 +15,7 @@ export default function Footer() {
           <a href="mailto:support@tubepay.com" className="hover:underline underline-offset-4">Contact</a>
         </div>
         <div className="text-xs text-gray-500 text-center md:text-right">
-          Built with <span className="text-red-500">&#10084;</span> by maniklakhanpal
+          Made by Manik Lakhanpal
         </div>
       </div>
     </footer>
