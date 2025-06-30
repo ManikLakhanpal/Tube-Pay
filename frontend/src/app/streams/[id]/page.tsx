@@ -16,6 +16,7 @@ import AboutCreatorCard from "@/components/streams/AboutCreatorCard";
 import RecentSupportCard from "@/components/streams/RecentSupportCard";
 import EditStreamModal from "@/components/streams/EditStreamModal";
 import DeleteConfirmModal from "@/components/streams/DeleteConfirmModal";
+import QRCodeCard from "@/components/streams/QRCodeCard";
 
 export default function StreamDetailPage() {
   const params = useParams();
@@ -187,6 +188,11 @@ export default function StreamDetailPage() {
               avatarUrl={stream.streamer.avatarUrl}
               id={stream.streamer.id}
             />
+            {
+              isOwner && (
+                <QRCodeCard />
+              )
+            }
             <RecentSupportCard payments={stream.payments} />
           </div>
         </div>
