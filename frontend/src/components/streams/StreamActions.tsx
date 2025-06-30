@@ -15,9 +15,9 @@ export default function StreamActions({ streamLink, isOwner, onEdit }: StreamAct
           href={streamLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex-1"
+          className="flex-1 text-wrap"
         >
-          <Button className="w-full" size="lg">
+          <Button className="w-full truncate" size="lg">
             <Eye className="h-5 w-5 mr-2" />
             Watch on YouTube
           </Button>
