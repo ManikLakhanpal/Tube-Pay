@@ -478,6 +478,7 @@ export default function ProfileView({ userId }: { userId?: string }) {
               </CardContent>
             </Card>
             {isOwnProfile && (
+              <>
               <Card>
                 <CardHeader>
                   <CardTitle>Quick Actions</CardTitle>
@@ -506,6 +507,18 @@ export default function ProfileView({ userId }: { userId?: string }) {
                   </div>
                 </CardContent>
               </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Donations</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <p>No donations yet.</p>
+                  </div>
+                </CardContent>
+              </Card>
+              </>
             )}
           </div>
         </div>

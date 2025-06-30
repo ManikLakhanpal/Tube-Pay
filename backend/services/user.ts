@@ -1,5 +1,7 @@
 import prisma from "../config/prisma";
 
+// TODO: Add payment selection to true if
+// TODO: the user is getting data for theirself
 const userSelectFields = {
   id: true,
   name: true,
