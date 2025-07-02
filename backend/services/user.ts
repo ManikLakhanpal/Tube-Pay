@@ -10,6 +10,9 @@ const userSelectFields = {
   createdAt: true,
   avatarUrl: true,
   streams: {
+    orderBy: {
+      createdAt: 'desc' as const,
+    },
     select: {
       id: true,
       title: true,
@@ -18,7 +21,7 @@ const userSelectFields = {
       streamLink: true,
       streamerId: true,
       createdAt: true,
-    },
+    }
   },
 };
 
