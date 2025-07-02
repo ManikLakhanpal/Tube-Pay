@@ -1,11 +1,10 @@
 "use client";
 
 import Modal from "../ui/PopupBox";
-import { useState } from "react";
+import { useState, Dispatch, SetStateAction } from "react";
 import { streamAPI } from "@/lib/api";
 import { Button } from "../ui/Button";
 import { User } from "@/types";
-import { Dispatch, SetStateAction } from "react";
 
 interface props {
   showCreateStream: boolean;
