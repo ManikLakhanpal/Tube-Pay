@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { userAPI, streamAPI } from "@/lib/api";
+import { userAPI } from "@/lib/api";
 import { Stream, User } from "@/types";
 import {
   User as UserIcon,
@@ -16,7 +16,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import Modal from "@/components/ui/PopupBox";
+import CreateStreamDialog from "@/components/profile/CreateStreamDialog";
 
 export default function ProfileView({ userId }: { userId?: string }) {
   const [user, setUser] = useState<User | null>(null);
@@ -32,15 +32,7 @@ export default function ProfileView({ userId }: { userId?: string }) {
   const router = useRouter();
   // Create Stream state
   const [showCreateStream, setShowCreateStream] = useState(false);
-  const [streamForm, setStreamForm] = useState({
-    title: "",
-    description: "",
-    streamLink: "",
-  });
-  const [creating, setCreating] = useState(false);
-  const [createError, setCreateError] = useState("");
-  const [createSuccess, setCreateSuccess] = useState("");
-
+ ;
   useEffect(() => {
     const fetchUser = async () => {
       const id = userId || authUser?.uid;
@@ -81,38 +73,6 @@ export default function ProfileView({ userId }: { userId?: string }) {
 
   // Create Stream logic
   const canCreateStream = isOwnProfile && user?.role === "STREAMER";
-  const handleCreateStream = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setCreating(true);
-    setCreateError("");
-    setCreateSuccess("");
-    try {
-      const newStream = await streamAPI.createStream({
-        title: streamForm.title,
-        description: streamForm.description,
-        streamLink: streamForm.streamLink,
-      });
-      if (newStream) {
-        setCreateSuccess("Stream created successfully!");
-        setStreamForm({ title: "", description: "", streamLink: "" });
-        setShowCreateStream(false);
-        setUser((prev) =>
-          prev
-            ? { ...prev, streams: [newStream, ...(prev.streams || [])] }
-            : prev
-        );
-      } else {
-        setCreateError(
-          "Failed to create stream. Make sure you are a streamer."
-        );
-      }
-    } catch (err) {
-      console.log(err);
-      setCreateError("Failed to create stream. Make sure you are a streamer.");
-    } finally {
-      setCreating(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -157,85 +117,11 @@ export default function ProfileView({ userId }: { userId?: string }) {
 
         {/* Create Stream Button and Modal */}
         {canCreateStream && (
-          <div className="mb-8">
-            <Modal
-              open={showCreateStream}
-              onClose={() => setShowCreateStream(false)}
-            >
-              <form onSubmit={handleCreateStream} className="space-y-4">
-                <h2 className="text-xl text-black font-bold mb-2">
-                  Create Stream
-                </h2>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Title
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={streamForm.title}
-                    onChange={(e) =>
-                      setStreamForm({ ...streamForm, title: e.target.value })
-                    }
-                    className="w-full px-3 py-2 text-black border placeholder:text-gray-500 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-                    placeholder="Stream Title"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Description
-                  </label>
-                  <textarea
-                    value={streamForm.description}
-                    onChange={(e) =>
-                      setStreamForm({
-                        ...streamForm,
-                        description: e.target.value,
-                      })
-                    }
-                    className="w-full text-black px-3 py-2 border placeholder:text-gray-500 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-                    rows={2}
-                    placeholder="Stream Description"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Stream Link (YouTube, etc.)
-                  </label>
-                  <input
-                    type="url"
-                    value={streamForm.streamLink}
-                    onChange={(e) =>
-                      setStreamForm({
-                        ...streamForm,
-                        streamLink: e.target.value,
-                      })
-                    }
-                    className="w-full text-black px-3 py-2 border placeholder:text-gray-500 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-                    placeholder="https://youtube.com/..."
-                  />
-                </div>
-                {createError && (
-                  <div className="text-red-600 text-sm">{createError}</div>
-                )}
-                {createSuccess && (
-                  <div className="text-green-600 text-sm">{createSuccess}</div>
-                )}
-                <div className="flex space-x-2">
-                  <Button type="submit" disabled={creating}>
-                    {creating ? "Creating..." : "Create Stream"}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    type="button"
-                    onClick={() => setShowCreateStream(false)}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </form>
-            </Modal>
-          </div>
+          <CreateStreamDialog 
+            showCreateStream={showCreateStream} 
+            setShowCreateStream={setShowCreateStream} 
+            setUser={setUser}
+            />
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
