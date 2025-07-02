@@ -3,7 +3,7 @@ export interface User {
   name: string;
   email: string;
   avatarUrl?: string;
-  role: 'ADMIN' | 'STREAMER' | 'USER';
+  role: "ADMIN" | "STREAMER" | "USER";
   createdAt: string;
   streams: Stream[];
 }
@@ -45,4 +45,29 @@ export interface AuthUser {
   emails: { value: string; verified: boolean }[];
   photos: { value: string }[];
   uid: string;
-} 
+}
+
+export interface RazorPayResponse {
+  razorpay_payment_id: string;
+  razorpay_order_id: string;
+  razorpay_signature: string;
+}
+
+export interface RazorPayOptions {
+  key: string;
+  amount: number;
+  currency: string;
+  order_id: string;
+  name: string;
+  description: string;
+  handler: (response: RazorPayResponse) => void;
+  prefill?: {
+    name?: string;
+    email?: string;
+    contact?: string;
+  };
+  theme?: {
+    color?: string;
+  };
+}
+

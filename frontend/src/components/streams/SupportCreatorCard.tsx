@@ -1,16 +1,26 @@
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/Card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { DollarSign } from "lucide-react";
 import { useState, useEffect } from "react";
 import { paymentAPI } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { RazorPayResponse } from "@/types";
 
 interface SupportCreatorCardProps {
   streamId: string;
   onPaymentSuccess?: () => void;
 }
 
-export default function SupportCreatorCard({ streamId, onPaymentSuccess }: SupportCreatorCardProps) {
+export default function SupportCreatorCard({
+  streamId,
+  onPaymentSuccess,
+}: SupportCreatorCardProps) {
   const [amount, setAmount] = useState(0);
   const [customAmount, setCustomAmount] = useState("");
   const [message, setMessage] = useState("");
@@ -18,7 +28,7 @@ export default function SupportCreatorCard({ streamId, onPaymentSuccess }: Suppo
   const [isProcessing, setIsProcessing] = useState(false);
   const { user: authUser } = useAuth();
 
-  // Load Razorpay script
+  // ! Load Razorpay script
   useEffect(() => {
     const script = document.createElement("script");
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
@@ -26,7 +36,9 @@ export default function SupportCreatorCard({ streamId, onPaymentSuccess }: Suppo
     document.body.appendChild(script);
 
     return () => {
-      const existingScript = document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]');
+      const existingScript = document.querySelector(
+        'script[src="https://checkout.razorpay.com/v1/checkout.js"]'
+      );
       if (existingScript) {
         document.body.removeChild(existingScript);
       }
@@ -45,7 +57,7 @@ export default function SupportCreatorCard({ streamId, onPaymentSuccess }: Suppo
 
   const handlePayment = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!authUser) {
       setPaymentStatus("Please sign in to make a donation.");
       return;
@@ -60,7 +72,7 @@ export default function SupportCreatorCard({ streamId, onPaymentSuccess }: Suppo
     setPaymentStatus(null);
 
     try {
-      // Create order
+      // ! Create order
       const orderData = {
         amount: amount,
         message: message || undefined,
@@ -68,13 +80,24 @@ export default function SupportCreatorCard({ streamId, onPaymentSuccess }: Suppo
       };
 
       const orderResponse = await paymentAPI.createOrder(orderData);
-      
+
       if (!orderResponse) {
         setPaymentStatus("Failed to create payment order. Please try again.");
         return;
       }
 
-      // Configure Razorpay options
+      useEffect(() => {
+        const hash = window.location.hash;
+        if (hash) {
+          const id = hash.replace("#", "");
+          const el = document.getElementById(id);
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth" });
+          }
+        }
+      }, []);
+
+      // ! Configure Razorpay options
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID, // Add this to your .env.local
         amount: orderResponse.amount,
@@ -82,9 +105,9 @@ export default function SupportCreatorCard({ streamId, onPaymentSuccess }: Suppo
         order_id: orderResponse.id,
         name: "TubePay",
         description: "Support Creator",
-        handler: async function (response: any) {
+        handler: async function (response: RazorPayResponse) {
           try {
-            // Verify payment
+            // ! Verify payment
             const verificationResponse = await paymentAPI.verifyPayment({
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
@@ -92,13 +115,17 @@ export default function SupportCreatorCard({ streamId, onPaymentSuccess }: Suppo
             });
 
             if (verificationResponse?.success) {
-              setPaymentStatus("Payment successful! Thank you for your support.");
+              setPaymentStatus(
+                "Payment successful! Thank you for your support."
+              );
               setAmount(0);
               setCustomAmount("");
               setMessage("");
               onPaymentSuccess?.();
             } else {
-              setPaymentStatus("Payment verification failed. Please contact support.");
+              setPaymentStatus(
+                "Payment verification failed. Please contact support."
+              );
             }
           } catch (error) {
             console.error("Payment verification error:", error);
@@ -133,6 +160,7 @@ export default function SupportCreatorCard({ streamId, onPaymentSuccess }: Suppo
   return (
     <Card id="support">
       <CardHeader>
+         
         <CardTitle className="flex items-center space-x-2">
           <DollarSign className="h-5 w-5" />
           <span>Support This Creator</span>
@@ -180,26 +208,28 @@ export default function SupportCreatorCard({ streamId, onPaymentSuccess }: Suppo
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
             />
           </div>
-          <Button 
-            type="submit" 
-            className="w-full" 
+          <Button
+            type="submit"
+            className="w-full"
             size="lg"
             disabled={isProcessing || amount <= 0}
           >
             {isProcessing ? "Processing..." : `Send Donation ₹${amount}`}
           </Button>
         </form>
-        
+
         {paymentStatus && (
-          <div className={`mt-4 p-3 rounded-md text-sm ${
-            paymentStatus.includes("successful") 
-              ? "bg-green-100 text-green-700 border border-green-200" 
-              : "bg-red-100 text-red-700 border border-red-200"
-          }`}>
+          <div
+            className={`mt-4 p-3 rounded-md text-sm ${
+              paymentStatus.includes("successful")
+                ? "bg-green-100 text-green-700 border border-green-200"
+                : "bg-red-100 text-red-700 border border-red-200"
+            }`}
+          >
             {paymentStatus}
           </div>
         )}
       </CardContent>
     </Card>
   );
-} 
+}
