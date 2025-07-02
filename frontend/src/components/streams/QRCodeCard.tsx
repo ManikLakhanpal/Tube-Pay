@@ -2,9 +2,8 @@
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import Link from "next/link";
 import Image from "next/image";
-import { User, Download, Copy } from "lucide-react";
+import { Download, Copy } from "lucide-react";
 import QRCode from "qrcode";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
