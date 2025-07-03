@@ -32,13 +32,14 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
+app.set("trust proxy", 1);
+
 app.use(
   session({
     store: new RedisStore({ client: redisClient }),
     secret: process.env.SESSION_SECRET || "your-secret-key",
     resave: false,
     saveUninitialized: false,
-    proxy: true, // Required for secure cookies behind a proxy
     cookie: {
       secure: process.env.NODE_ENV === "production", // Must be true in production
       httpOnly: true,
