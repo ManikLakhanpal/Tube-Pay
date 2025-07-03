@@ -88,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       };
 
-      const pollTimer: NodeJS.Timeout = setInterval(pollAuth, 10);
+      const pollTimer: NodeJS.Timeout = setInterval(pollAuth, 4000);
     });
   };
 
