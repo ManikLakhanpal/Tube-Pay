@@ -55,14 +55,14 @@ export function StreamCard({ stream }: StreamCardProps) {
               rel="noopener noreferrer"
               className="flex-1"
             >
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full whitespace-nowrap">
                 <Eye className="h-4 w-4 mr-2" />
                 Watch Stream
               </Button>
             </a>
           )}
           <Link href={`/streams/${stream.id}`} className="flex-1">
-            <Button className="w-full">
+            <Button className="w-full whitespace-nowrap">
               <Video className="h-4 w-4 mr-2" />
               View Details
             </Button>
