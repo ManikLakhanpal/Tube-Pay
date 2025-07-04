@@ -34,7 +34,7 @@ router.get("/google/callback",
 
 /*
  *    Check's the current user
- *    GET /api/auth/
+ *    GET /api/auth/current
  *    Returns: user object or null on error
  */
 router.get('/current', (req: reqUser, res: any) => {

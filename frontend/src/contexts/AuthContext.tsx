@@ -8,6 +8,7 @@ import {
   ReactNode,
 } from "react";
 import { AuthUser } from "@/types";
+import { useRouter } from "next/navigation";
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -22,6 +23,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   const checkAuth = async () => {
     try {
@@ -75,9 +77,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (response.ok) {
             const data = await response.json();
             if (data[0].status === "verified" && data[1].user) {
-              await checkAuth();
               popup.close();
               clearInterval(pollTimer);
+              router.push('/auth/callback')
               resolve();
               return;
             }
@@ -91,7 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       };
 
-      const pollTimer: NodeJS.Timeout = setInterval(pollAuth, 10000);
+      const pollTimer: NodeJS.Timeout = setInterval(pollAuth, 200);
     });
   };
 
