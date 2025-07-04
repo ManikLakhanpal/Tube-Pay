@@ -52,13 +52,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return new Promise<void>((resolve, reject) => {
       const width = 500;
       const height = 600;
+
       const left = window.screenX + (window.outerWidth - width) / 2;
       const top = window.screenY + (window.outerHeight - height) / 2;
+
       const popup = window.open(
         `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`,
         "googleSignIn",
         `width=${width},height=${height},left=${left},top=${top}`
       );
+      
       if (!popup) {
         reject(new Error("Failed to open popup"));
         return;
