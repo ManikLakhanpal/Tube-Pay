@@ -3,10 +3,10 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
 import { streamAPI } from '@/lib/api';
 import { Stream } from '@/types';
-import { Video, Eye, Calendar, User } from 'lucide-react';
+import { Video } from 'lucide-react';
+import { StreamCard } from '@/components/StreamList';
 
 export default function StreamsPage() {
   const [streams, setStreams] = useState<Stream[]>([]);
@@ -64,57 +64,8 @@ export default function StreamsPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {streams.map((stream) => (
-              <Card key={stream.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                      <span className="text-sm font-medium text-red-600">LIVE</span>
-                    </div>
-                    <span className="text-sm text-gray-500">
-                      {new Date(stream.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <CardTitle className="line-clamp-2">{stream.title}</CardTitle>
-                  <CardDescription className="line-clamp-2">
-                    {stream.description || 'No description available'}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center space-x-4 text-sm text-gray-600 mb-4">
-                    <div className="flex items-center space-x-1">
-                      <User className="h-4 w-4" />
-                      <span>{stream.streamer.name}</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <Calendar className="h-4 w-4" />
-                      <span>{new Date(stream.createdAt).toLocaleDateString()}</span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex space-x-2">
-                    {stream.streamLink && (
-                      <a
-                        href={stream.streamLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-1"
-                      >
-                        <Button variant="outline" className="w-full">
-                          <Eye className="h-4 w-4 mr-2" />
-                          Watch Stream
-                        </Button>
-                      </a>
-                    )}
-                    <Link href={`/streams/${stream.id}`} className="flex-1">
-                      <Button className="w-full">
-                        <Video className="h-4 w-4 mr-2" />
-                        View Details
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
+              
+              <StreamCard key={stream.id} stream={stream} />
             ))}
           </div>
         )}
