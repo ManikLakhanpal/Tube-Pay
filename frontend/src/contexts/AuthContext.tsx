@@ -25,7 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkAuth = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/current`, {
         credentials: "include",
       });
 
@@ -69,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const pollAuth = async () => {
         try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/`, {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/current`, {
             credentials: "include",
           });
           if (response.ok) {

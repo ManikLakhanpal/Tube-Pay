@@ -33,6 +33,19 @@ router.get("/google/callback",
 );
 
 /*
+ *    Check's the current user
+ *    GET /api/auth/
+ *    Returns: user object or null on error
+ */
+router.get('/current', (req: reqUser, res: any) => {
+    if (req.user) {
+        return res.json([{"status": "verified"},{"user" :req.user}]);
+    }
+    
+    res.status(200).json([{"status": "Not verified"},{"user" :req.user}]);
+})
+
+/*
  *    Logs out user
  *    DELETE /api/auth/logout
  *    Returns: user object or null on error

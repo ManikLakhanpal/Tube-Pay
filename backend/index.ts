@@ -62,14 +62,6 @@ app.use('/api/user', userRoutes);
 app.use('/api/streams', streamRoutes);
 app.use('/api/payment', paymentRoutes);
 
-app.get('/', (req: reqUser, res: any) => {
-    if (req.user) {
-        return res.json([{"status": "verified"},{"user" :req.user}]);
-    }
-    
-    res.status(200).json([{"status": "Not verified"},{"user" :req.user}]);
-})
-
 app.get('/test', authenticate, (req: reqUser, res: any) => {
     console.log("Protected route was accessed");
 
