@@ -1,31 +1,39 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function AuthCallback() {
   const router = useRouter();
-  const { checkAuth } = useAuth();
+  const { user, checkAuth, loading } = useAuth();
 
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        // Check if user is authenticated
+        // * 1. Check if user is authenticated
         await checkAuth();
-        
-        // Redirect to home page after successful authentication
-        setTimeout(() => {
-          router.push('/profile');
-        }, 4000)
+
+        // * 2. Redirect to home page after successful authentication
+        if (!user) {
+          router.replace("/signin");
+        }
+
+        // * 3. Wait and redirect the user
+        if (!loading && user?.uid) {
+          setTimeout(() => {
+            router.push(`/profile/${user.uid}`);
+          }, 4000);
+        }
+
       } catch (error) {
-        console.error('Authentication error:', error);
-        router.push('/signin');
+        console.error("Authentication error:", error);
+        router.push("/signin");
       }
     };
 
     handleCallback();
-  }, [checkAuth, router]);
+  }, [user, loading, router]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -35,4 +43,4 @@ export default function AuthCallback() {
       </div>
     </div>
   );
-} 
+}

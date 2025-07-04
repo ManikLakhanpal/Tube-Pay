@@ -13,7 +13,7 @@ export default function SignIn() {
   // Redirect if already authenticated
   useEffect(() => {
     if (user && !loading) {
-      router.push('/');
+      router.push('/profile');
     }
   }, [user, loading, router]);
 
