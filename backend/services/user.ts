@@ -1,4 +1,5 @@
 import prisma from "../config/prisma";
+import { RedisService } from "./redis";
 
 // TODO: Add payment selection to true if
 // TODO: the user is getting data for theirself
@@ -11,7 +12,7 @@ const userSelectFields = {
   avatarUrl: true,
   streams: {
     orderBy: {
-      createdAt: 'desc' as const,
+      createdAt: "desc" as const,
     },
     select: {
       id: true,
@@ -21,7 +22,7 @@ const userSelectFields = {
       streamLink: true,
       streamerId: true,
       createdAt: true,
-    }
+    },
   },
 };
 
@@ -32,16 +33,50 @@ const userSelectFields = {
 export const findUser = async (email?: string, id?: string) => {
   try {
     if (id) {
-      return await prisma.user.findUnique({
+      // * 1. Check if user is cached
+      const cachedUser = await RedisService.getCachedUserProfile(id);
+
+      if (cachedUser) {
+        console.log(`✅ User ${id} data retrieved from cache`);
+        return cachedUser;
+      }
+
+      // * 2. If not cached, get from database
+      const user = await prisma.user.findUnique({
         where: { id },
         select: userSelectFields,
       });
+
+      // * 3. Cache the result
+      if (user) {
+        await RedisService.cacheUserProfile(user.id, user);
+        console.log(`✅ User ${user.id} cached`);
+      }
+
+      return user;
     }
     if (email) {
-      return await prisma.user.findUnique({
+      // * 1. Check if user is cached
+      const cachedUser = await RedisService.getCachedUserProfile(email);
+
+      if (cachedUser) {
+        console.log(`✅ User ${email} data retrieved from cache`);
+        return cachedUser;
+      }
+
+      // * 2. If not cached, get from database
+      const user = await prisma.user.findUnique({
         where: { email },
         select: userSelectFields,
       });
+
+      // * 3. Cache the result
+      if (user) {
+        await RedisService.cacheUserProfile(user.id, user);
+        console.log(`✅ User ${user.id} cached`);
+      }
+
+      return user;
     }
     return null;
   } catch (error) {
@@ -56,6 +91,7 @@ export const findUser = async (email?: string, id?: string) => {
  */
 export const createUser = async (name: string, email: string) => {
   try {
+    // * 1. Create the user
     const user = await prisma.user.create({
       data: {
         name,
@@ -63,7 +99,12 @@ export const createUser = async (name: string, email: string) => {
       },
       select: userSelectFields,
     });
-    
+
+    // * 2. Cache the result
+    if (user) {
+      await RedisService.cacheUserProfile(user.id, user);
+    }
+
     return user;
   } catch (error) {
     console.error(`Error creating user`);
@@ -76,7 +117,7 @@ export const createUser = async (name: string, email: string) => {
  *    Updates user profile with name, returns user object or null on error
  */
 const ALLOWED_ROLES = ["USER", "STREAMER"] as const;
-type Role = typeof ALLOWED_ROLES[number];
+type Role = (typeof ALLOWED_ROLES)[number];
 
 export const updateUserProfile = async (
   name: string | undefined,
@@ -101,10 +142,20 @@ export const updateUserProfile = async (
       data.role = role;
     }
 
+    // * 1. Update the user
     const user = await prisma.user.update({
       where: { id: uid },
       data,
     });
+
+    // * 2. Invalidate user profile cache
+    await RedisService.invalidateUserProfileCache(uid);
+    await RedisService.invalidateUserProfileCache(user.email);
+
+    // * 3. Cache the result
+    if (user) {
+      await RedisService.cacheUserProfile(user.id, user);
+    }
 
     return user;
   } catch (error: any) {
@@ -112,4 +163,3 @@ export const updateUserProfile = async (
     throw error; // rethrow for upstream handling
   }
 };
-

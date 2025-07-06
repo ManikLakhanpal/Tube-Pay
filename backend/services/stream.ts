@@ -1,10 +1,12 @@
 import prisma from "../config/prisma";
+import { RedisService } from "./redis";
 
 /*
  *    Creates a new stream for a user, returns stream object or null on error
  */
 export const createStream = async (title: string, description: string | null, streamLink: string | null, streamerId: string) => {
   try {
+    // * 1. Create the stream
     const stream = await prisma.stream.create({
       data: {
         title,
@@ -24,6 +26,10 @@ export const createStream = async (title: string, description: string | null, st
         },
       },
     });
+
+    // * 2. Invalidate the live streams cache
+    await RedisService.invalidateLiveStreamsCache();
+
     return stream;
   } catch (error) {
     console.error("Error creating stream:", error);
@@ -36,6 +42,7 @@ export const createStream = async (title: string, description: string | null, st
  */
 export const updateStream = async (streamId: string, updates: { title?: string; description?: string; streamLink?: string; isLive?: boolean }) => {
   try {
+    // * 1. Update the stream
     const stream = await prisma.stream.update({
       where: { id: streamId },
       data: updates,
@@ -50,6 +57,10 @@ export const updateStream = async (streamId: string, updates: { title?: string; 
         },
       },
     });
+
+    // * 2. Invalidate the stream cache
+    await RedisService.invalidateStreamCache(streamId);
+
     return stream;
   } catch (error) {
     console.error("Error updating stream:", error);
@@ -62,9 +73,14 @@ export const updateStream = async (streamId: string, updates: { title?: string; 
  */
 export const deleteStream = async (streamId: string) => {
   try {
+    // * 1. Delete the stream from the database
     await prisma.stream.delete({
       where: { id: streamId },
     });
+
+    // * 2. Invalidate the stream cache
+    await RedisService.invalidateStreamCache(streamId);
+
     return true;
   } catch (error) {
     console.error("Error deleting stream:", error);
@@ -77,6 +93,15 @@ export const deleteStream = async (streamId: string) => {
  */
 export const getStreamById = async (streamId: string) => {
   try {
+    // * 1. Check if stream is cached
+    const cachedStream = await RedisService.getCachedStreamDetails(streamId);
+
+    if (cachedStream) {
+      console.log("Stream data retrieved from cache");
+      return cachedStream;
+    }
+
+    // * 2. If not cached, get from database
     const stream = await prisma.stream.findUnique({
       where: { id: streamId },
       include: {
@@ -113,6 +138,10 @@ export const getStreamById = async (streamId: string) => {
         },
       },
     });
+
+    // * 3. Cache the result
+    await RedisService.cacheStreamDetails(streamId, stream);
+
     return stream;
   } catch (error) {
     console.error("Error finding stream:", error);
@@ -151,6 +180,15 @@ export const getStreamsByStreamer = async (streamerId: string) => {
  */
 export const getLiveStreams = async () => {
   try {
+    // * 1. Check is live streams are cached
+    const cachedStreams = await RedisService.getCachedLiveStreams();
+
+    if (cachedStreams) {
+      console.log("Live stream data retrieved from cache");
+      return cachedStreams;
+    }
+    
+    // * 2. If not cached, get from database
     const streams = await prisma.stream.findMany({
       where: { isLive: true },
       include: {
@@ -165,6 +203,10 @@ export const getLiveStreams = async () => {
       },
       orderBy: { createdAt: "desc" },
     });
+
+    // * 3. Cache the result
+    await RedisService.cacheLiveStreams(streams);
+
     return streams;
   } catch (error) {
     console.error("Error finding live streams:", error);
