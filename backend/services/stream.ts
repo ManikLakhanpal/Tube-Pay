@@ -30,6 +30,11 @@ export const createStream = async (title: string, description: string | null, st
     // * 2. Invalidate the live streams cache
     await RedisService.invalidateLiveStreamsCache();
 
+    // * 3. Cache the result
+    if (stream) {
+      await RedisService.cacheStreamDetails(stream.id, stream);
+    }
+
     return stream;
   } catch (error) {
     console.error("Error creating stream:", error);
@@ -60,6 +65,11 @@ export const updateStream = async (streamId: string, updates: { title?: string; 
 
     // * 2. Invalidate the stream cache
     await RedisService.invalidateStreamCache(streamId);
+
+    // * 3. Cache the result
+    if (stream) {
+      await RedisService.cacheStreamDetails(stream.id, stream);
+    }
 
     return stream;
   } catch (error) {
@@ -97,7 +107,7 @@ export const getStreamById = async (streamId: string) => {
     const cachedStream = await RedisService.getCachedStreamDetails(streamId);
 
     if (cachedStream) {
-      console.log("Stream data retrieved from cache");
+      console.log(`✅ Stream ${streamId} data retrieved from cache`);
       return cachedStream;
     }
 
@@ -184,7 +194,7 @@ export const getLiveStreams = async () => {
     const cachedStreams = await RedisService.getCachedLiveStreams();
 
     if (cachedStreams) {
-      console.log("Live stream data retrieved from cache");
+      console.log(`✅ Live streams data retrieved from cache`);
       return cachedStreams;
     }
     

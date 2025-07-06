@@ -6,6 +6,9 @@ const CACHE_TTL = {
   STREAM_DETAILS: 300, // 5 minutes
   USER_PROFILE: 600, // 10 minutes
   PAYMENT_STATS: 60, // 1 minute
+  PAYMENT_DETAILS: 300, // 5 minutes
+  USER_PAYMENTS: 180, // 3 minutes
+  STREAMER_PAYMENTS: 180, // 3 minutes
 };
 
 export class RedisService {
@@ -174,6 +177,214 @@ export class RedisService {
     } catch (error) {
       console.error(`❌ Error getting payment ${paymentId} data:`, error);
       return null;
+    }
+  }
+
+  // * Cache payment details
+  static async cachePaymentDetails(paymentId: string, paymentData: any) {
+    try {
+      const key = `payment_details:${paymentId}`;
+      await redisClient.setEx(key, CACHE_TTL.PAYMENT_DETAILS, JSON.stringify(paymentData));
+      console.log(`✅ Payment details ${paymentId} cached`);
+    } catch (error) {
+      console.error(`❌ Error caching payment details ${paymentId}:`, error);
+    }
+  }
+
+  // * Get cached payment details
+  static async getCachedPaymentDetails(paymentId: string) {
+    try {
+      const key = `payment_details:${paymentId}`;
+      const cached = await redisClient.get(key);
+      return cached ? JSON.parse(cached) : null;
+    } catch (error) {
+      console.error(`❌ Error getting cached payment details ${paymentId}:`, error);
+      return null;
+    }
+  }
+
+  // * Cache user sent payments list
+  static async cacheUserSentPayments(userId: string, status: string | undefined, page: number, paymentsData: any) {
+    try {
+      const statusKey = status || 'all';
+      const key = `user_sent_payments:${userId}:${statusKey}:${page}`;
+      await redisClient.setEx(key, CACHE_TTL.USER_PAYMENTS, JSON.stringify(paymentsData));
+      console.log(`✅ User ${userId} sent payments cached (status: ${statusKey}, page: ${page})`);
+    } catch (error) {
+      console.error(`❌ Error caching user ${userId} sent payments:`, error);
+    }
+  }
+
+  // * Get cached user sent payments
+  static async getCachedUserSentPayments(userId: string, status: string | undefined, page: number) {
+    try {
+      const statusKey = status || 'all';
+      const key = `user_sent_payments:${userId}:${statusKey}:${page}`;
+      const cached = await redisClient.get(key);
+      return cached ? JSON.parse(cached) : null;
+    } catch (error) {
+      console.error(`❌ Error getting cached user ${userId} sent payments:`, error);
+      return null;
+    }
+  }
+
+  // * Cache streamer received payments list
+  static async cacheStreamerReceivedPayments(streamerId: string, status: string | undefined, page: number, paymentsData: any) {
+    try {
+      const statusKey = status || 'all';
+      const key = `streamer_received_payments:${streamerId}:${statusKey}:${page}`;
+      await redisClient.setEx(key, CACHE_TTL.STREAMER_PAYMENTS, JSON.stringify(paymentsData));
+      console.log(`✅ Streamer ${streamerId} received payments cached (status: ${statusKey}, page: ${page})`);
+    } catch (error) {
+      console.error(`❌ Error caching streamer ${streamerId} received payments:`, error);
+    }
+  }
+
+  // * Get cached streamer received payments
+  static async getCachedStreamerReceivedPayments(streamerId: string, status: string | undefined, page: number) {
+    try {
+      const statusKey = status || 'all';
+      const key = `streamer_received_payments:${streamerId}:${statusKey}:${page}`;
+      const cached = await redisClient.get(key);
+      return cached ? JSON.parse(cached) : null;
+    } catch (error) {
+      console.error(`❌ Error getting cached streamer ${streamerId} received payments:`, error);
+      return null;
+    }
+  }
+
+  // * Invalidate payment-related caches when payment is updated
+  static async invalidatePaymentCaches(paymentId: string, userId: string, streamId: string) {
+    try {
+      // Invalidate payment details cache
+      await redisClient.del(`payment_details:${paymentId}`);
+      
+      // Invalidate all user sent payments caches for this user
+      const userSentKeys = await redisClient.keys(`user_sent_payments:${userId}:*`);
+      if (userSentKeys.length > 0) {
+        for (const key of userSentKeys) {
+          await redisClient.del(key);
+        }
+      }
+
+      // Get streamer ID from stream cache or database (you might need to pass this as parameter)
+      // For now, we'll invalidate all streamer received payments caches
+      // You can optimize this by storing streamer ID in payment data
+      
+      // Invalidate stream donations cache
+      await redisClient.del(`stream_donations:${streamId}`);
+      
+      // Invalidate stream details cache
+      await redisClient.del(`stream:${streamId}`);
+      
+      console.log(`✅ Payment ${paymentId} related caches invalidated`);
+    } catch (error) {
+      console.error(`❌ Error invalidating payment ${paymentId} caches:`, error);
+    }
+  }
+
+  // * Invalidate all payment caches for a user
+  static async invalidateUserPaymentCaches(userId: string) {
+    try {
+      // Invalidate user sent payments
+      const userSentKeys = await redisClient.keys(`user_sent_payments:${userId}:*`);
+      if (userSentKeys.length > 0) {
+        for (const key of userSentKeys) {
+          await redisClient.del(key);
+        }
+      }
+
+      // Invalidate user received payments (if they're a streamer)
+      const streamerReceivedKeys = await redisClient.keys(`streamer_received_payments:${userId}:*`);
+      if (streamerReceivedKeys.length > 0) {
+        for (const key of streamerReceivedKeys) {
+          await redisClient.del(key);
+        }
+      }
+
+      console.log(`✅ User ${userId} payment caches invalidated`);
+    } catch (error) {
+      console.error(`❌ Error invalidating user ${userId} payment caches:`, error);
+    }
+  }
+
+  // * Get payment statistics for a stream (cached)
+  static async getStreamPaymentStats(streamId: string) {
+    try {
+      const key = `stream_payment_stats:${streamId}`;
+      const cached = await redisClient.get(key);
+      return cached ? JSON.parse(cached) : null;
+    } catch (error) {
+      console.error(`❌ Error getting stream ${streamId} payment stats:`, error);
+      return null;
+    }
+  }
+
+  // * Cache payment statistics for a stream
+  static async cacheStreamPaymentStats(streamId: string, stats: any) {
+    try {
+      const key = `stream_payment_stats:${streamId}`;
+      await redisClient.setEx(key, CACHE_TTL.PAYMENT_STATS, JSON.stringify(stats));
+      console.log(`✅ Stream ${streamId} payment stats cached`);
+    } catch (error) {
+      console.error(`❌ Error caching stream ${streamId} payment stats:`, error);
+    }
+  }
+
+  // * Get cache statistics and performance metrics
+  static async getCacheStats() {
+    try {
+      const info = await redisClient.info('stats');
+      const keyspace = await redisClient.info('keyspace');
+      
+      // Get some basic stats
+      const totalKeys = await redisClient.dbSize();
+      
+      return {
+        totalKeys,
+        info,
+        keyspace,
+        timestamp: new Date().toISOString()
+      };
+    } catch (error) {
+      console.error('❌ Error getting cache stats:', error);
+      return null;
+    }
+  }
+
+  // * Clear all payment-related caches (useful for maintenance)
+  static async clearPaymentCaches() {
+    try {
+      const paymentKeys = await redisClient.keys('payment*');
+      const userPaymentKeys = await redisClient.keys('user_sent_payments*');
+      const streamerPaymentKeys = await redisClient.keys('streamer_received_payments*');
+      const streamDonationKeys = await redisClient.keys('stream_donations*');
+      const streamPaymentStatsKeys = await redisClient.keys('stream_payment_stats*');
+      
+      const allKeys = [...paymentKeys, ...userPaymentKeys, ...streamerPaymentKeys, ...streamDonationKeys, ...streamPaymentStatsKeys];
+      
+      if (allKeys.length > 0) {
+        for (const key of allKeys) {
+          await redisClient.del(key);
+        }
+        console.log(`✅ Cleared ${allKeys.length} payment-related cache keys`);
+      }
+      
+      return allKeys.length;
+    } catch (error) {
+      console.error('❌ Error clearing payment caches:', error);
+      return 0;
+    }
+  }
+
+  // * Health check for Redis connection
+  static async healthCheck() {
+    try {
+      await redisClient.ping();
+      return { status: 'healthy', timestamp: new Date().toISOString() };
+    } catch (error) {
+      console.error('❌ Redis health check failed:', error);
+      return { status: 'unhealthy', error: (error as Error).message, timestamp: new Date().toISOString() };
     }
   }
 }

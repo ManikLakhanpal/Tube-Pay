@@ -165,17 +165,17 @@ export default function ProfileView({ userId }: { userId?: string }) {
                           className="w-full justify-start hover:cursor-pointer"
                           onClick={() => setShowCreateStream(true)}
                         >
-                          <Video className="h-4 w-4 mr-2" />
+                          <Video className="h-4 w-4 mr-2 justify-center" />
                           Create Stream
                         </Button>
                       )}
                       {isOwnProfile && (
                         <Button
                           variant="outline"
-                          className="w-full justify-star text-black hover:cursor-pointer hover:bg-green-500"
+                          className="w-full justify-start text-black hover:cursor-pointer hover:bg-green-500"
                           onClick={() => router.push('/payments')}
                         >
-                          <DollarSign className="h-4 w-4 mr-2" />
+                          <DollarSign className="h-4 w-4 mr-2 justify-center" />
                           View Income
                         </Button>
                       )}

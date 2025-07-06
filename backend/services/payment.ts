@@ -1,5 +1,6 @@
 import { PaymentStatus } from "@prisma/client";
 import prisma from "../config/prisma";
+import { RedisService } from "./redis";
 
 /*
  *    Creates a new payment for a stream, returns payment object or null on error
@@ -28,6 +29,9 @@ export const createPayment = async (
       throw new Error("Error creating payment");
     }
 
+    // Cache the payment details
+    await RedisService.cachePaymentDetails(orderId, payment);
+
     return payment;
   } catch (error) {
     console.error("Error creating payment:", error);
@@ -37,10 +41,19 @@ export const createPayment = async (
 };
 
 /*
- *    Gets a payment by id, returns payment object or null on error
+ *    Gets a payment by id with Redis caching, returns payment object or null on error
  */
 export const getPayment = async (id: string) => {
   try {
+    // First, try to get from cache
+    const cachedPayment = await RedisService.getCachedPaymentDetails(id);
+    if (cachedPayment) {
+      console.log(`📦 Returning cached payment ${id}`);
+      return cachedPayment;
+    }
+
+    // If not in cache, fetch from database
+    console.log(`🗄️ Fetching payment ${id} from database`);
     const payment = await prisma.payment.findUnique({
       where: { id },
     });
@@ -50,6 +63,9 @@ export const getPayment = async (id: string) => {
       throw new Error("Payment not found");
     }
 
+    // Cache the payment for future requests
+    await RedisService.cachePaymentDetails(id, payment);
+
     return payment;
   } catch (error) {
     console.error("Error getting payment:", error);
@@ -57,9 +73,8 @@ export const getPayment = async (id: string) => {
   }
 };
 
-
 /*
- *    Get all payments sent by a user with pagination
+ *    Get all payments sent by a user with pagination and Redis caching
  *    Params: userId - user id
  *    Params: status - payment status (optional)
  *    Params: page - page number (default: 1)
@@ -73,6 +88,16 @@ export const getSentPaymentsByUserId = async (
   limit: number = 10
 ) => {
   try {
+    // First, try to get from cache
+    const cachedPayments = await RedisService.getCachedUserSentPayments(userId, status, page);
+    if (cachedPayments) {
+      console.log(`📦 Returning cached sent payments for user ${userId} (page: ${page})`);
+      return cachedPayments;
+    }
+
+    // If not in cache, fetch from database
+    console.log(`🗄️ Fetching sent payments for user ${userId} from database (page: ${page})`);
+    
     const whereClause: any = { userId };
     // ! if status is provided, add it to the where clause
     if (status !== undefined) {
@@ -127,7 +152,7 @@ export const getSentPaymentsByUserId = async (
     const hasNextPage = page < totalPages;
     const hasPrevPage = page > 1;
 
-    return {
+    const result = {
       payments,
       pagination: {
         currentPage: page,
@@ -138,6 +163,11 @@ export const getSentPaymentsByUserId = async (
         limit,
       },
     };
+
+    // Cache the result for future requests
+    await RedisService.cacheUserSentPayments(userId, status, page, result);
+
+    return result;
   } catch (error) {
     console.error("Error getting sent payments:", error);
     throw new Error("Error getting sent payments");
@@ -145,7 +175,7 @@ export const getSentPaymentsByUserId = async (
 };
 
 /*
- *    Get all payments received by a streamer (payments for their streams)
+ *    Get all payments received by a streamer with pagination and Redis caching
  *    Params: streamerId - streamer user id
  *    Params: status - payment status (optional)
  *    Params: page - page number (default: 1)
@@ -159,6 +189,16 @@ export const getReceivedPaymentsByStreamerId = async (
   limit: number = 10
 ) => {
   try {
+    // First, try to get from cache
+    const cachedPayments = await RedisService.getCachedStreamerReceivedPayments(streamerId, status, page);
+    if (cachedPayments) {
+      console.log(`📦 Returning cached received payments for streamer ${streamerId} (page: ${page})`);
+      return cachedPayments;
+    }
+
+    // If not in cache, fetch from database
+    console.log(`🗄️ Fetching received payments for streamer ${streamerId} from database (page: ${page})`);
+    
     const whereClause: any = {
       stream: {
         streamerId: streamerId,
@@ -219,7 +259,7 @@ export const getReceivedPaymentsByStreamerId = async (
     const hasNextPage = page < totalPages;
     const hasPrevPage = page > 1;
 
-    return {
+    const result = {
       payments,
       pagination: {
         currentPage: page,
@@ -230,6 +270,11 @@ export const getReceivedPaymentsByStreamerId = async (
         limit,
       },
     };
+
+    // Cache the result for future requests
+    await RedisService.cacheStreamerReceivedPayments(streamerId, status, page, result);
+
+    return result;
   } catch (error) {
     console.error("Error getting received payments:", error);
     throw new Error("Error getting received payments");
@@ -237,7 +282,7 @@ export const getReceivedPaymentsByStreamerId = async (
 };
 
 /*
- *    Updates a payment by id, returns updated payment object or null on error
+ *    Updates a payment by id with cache invalidation, returns updated payment object or null on error
  */
 export const updatePayment = async (id: string, status: PaymentStatus) => {
   try {
@@ -249,6 +294,17 @@ export const updatePayment = async (id: string, status: PaymentStatus) => {
     if (!payment) {
       console.error("Payment not found:", id);
       throw new Error("Payment not found");
+    }
+
+    // Update the payment in cache
+    await RedisService.cachePaymentDetails(id, payment);
+
+    // Invalidate related caches
+    await RedisService.invalidatePaymentCaches(id, payment.userId, payment.streamId);
+
+    // If payment is successful, update stream donations
+    if (status === "SUCCESS") {
+      await RedisService.incrementStreamDonations(payment.streamId, payment.amount);
     }
 
     return payment;

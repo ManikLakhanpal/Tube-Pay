@@ -4,14 +4,29 @@ import razorpay from "../config/razorpay";
 import { createPayment, getPayment, updatePayment } from "../services/payment";
 import { getSentPaymentsByUserId, getReceivedPaymentsByStreamerId } from "../services/payment";
 import { PaymentStatus } from "@prisma/client";
+import { RedisService } from "../services/redis";
 
 /*
- *    Creates an order
+ *    Creates an order with rate limiting
  *    POST /api/payment/order
  *    Returns: order object or null on error
  */
 export const createOrderHandler = async (req: reqUser, res: any) => {
   try {
+    // Rate limiting: max 10 orders per minute per user
+    const rateLimitAllowed = await RedisService.checkRateLimit(
+      req.user.uid, 
+      'create_order', 
+      10, 
+      60
+    );
+
+    if (!rateLimitAllowed) {
+      return res.status(429).json({ 
+        error: "Too many payment requests. Please wait a moment." 
+      });
+    }
+
     // * STEP 1: Get the amount from the request body
     const { amount, message, streamId } = req.body;
     const amountInPaise = amount * 100;
@@ -46,7 +61,7 @@ export const createOrderHandler = async (req: reqUser, res: any) => {
 };
 
 /*
- *    Verifies the payments
+ *    Verifies the payments with cache invalidation
  *    POST /api/payment/verify
  *    Returns: success: true or false
  */

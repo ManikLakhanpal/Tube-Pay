@@ -103,6 +103,7 @@ export const createUser = async (name: string, email: string) => {
     // * 2. Cache the result
     if (user) {
       await RedisService.cacheUserProfile(user.id, user);
+      console.log(`✅ User ${user.id} cached`);
     }
 
     return user;
@@ -160,6 +161,6 @@ export const updateUserProfile = async (
     return user;
   } catch (error: any) {
     console.error(`Error updating user profile: ${error.message}`, error);
-    throw error; // rethrow for upstream handling
+    throw error; 
   }
 };
