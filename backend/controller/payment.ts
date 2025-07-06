@@ -2,6 +2,8 @@ import crypto from "crypto";
 import { reqUser } from "../types";
 import razorpay from "../config/razorpay";
 import { createPayment, getPayment, updatePayment } from "../services/payment";
+import { getSentPaymentsByUserId, getReceivedPaymentsByStreamerId } from "../services/payment";
+import { PaymentStatus } from "@prisma/client";
 
 /*
  *    Creates an order
@@ -58,7 +60,6 @@ export const verifyOrderHandler = async (req: reqUser, res: any) => {
   const generatedSignature = hmac.digest("hex");
 
   if (generatedSignature === razorpay_signature) {
-
     // * STEP 1: Get the payment
     const payment = await getPayment(razorpay_order_id);
 
@@ -73,15 +74,56 @@ export const verifyOrderHandler = async (req: reqUser, res: any) => {
     // * STEP 2: Update the payment
     await updatePayment(razorpay_order_id, "SUCCESS");
 
-    console.log(`Payment verified successfully for payment id: ${razorpay_payment_id}`);
+    console.log(
+      `Payment verified successfully for payment id: ${razorpay_payment_id}`
+    );
     res
       .status(200)
       .send({ success: true, message: "Payment verified successfully!" });
   } else {
-
-    console.log(`Payment verification failed for payment id: ${razorpay_payment_id}`);
+    console.log(
+      `Payment verification failed for payment id: ${razorpay_payment_id}`
+    );
     res
       .status(401)
       .send({ success: false, message: "Payment verification failed." });
+  }
+};
+
+export const getSentPaymentsHandler = async (req: reqUser, res: any) => {
+  try {
+    const { status, page, limit } = req.query;
+
+    const payments = await getSentPaymentsByUserId(
+      req.user.uid,
+      status as PaymentStatus | undefined,
+      parseInt(page as string) || 1,
+      parseInt(limit as string) || 10
+    );
+
+    res.status(200).json(payments);
+  } catch (err) {
+    console.log(err);
+
+    res.status(500).send("Error getting sent payments");
+  }
+};
+
+export const getReceivedPaymentsHandler = async (req: reqUser, res: any) => {
+  try {
+    const { status, page, limit } = req.query;
+
+    const payments = await getReceivedPaymentsByStreamerId(
+      req.user.uid,
+      status as PaymentStatus | undefined,
+      parseInt(page as string) || 1,
+      parseInt(limit as string) || 10
+    );
+
+    res.status(200).json(payments);
+  } catch (err) {
+    console.log(err);
+
+    res.status(500).send("Error getting received payments");
   }
 };
