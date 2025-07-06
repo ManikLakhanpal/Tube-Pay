@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/Button";
 import { Eye, DollarSign } from "lucide-react";
+import Link from "next/link";
 
 interface StreamActionsProps {
   streamLink?: string;
@@ -11,7 +12,7 @@ export default function StreamActions({ streamLink, isOwner, onEdit }: StreamAct
   return (
     <div className="flex flex-col sm:flex-row gap-4">
       {streamLink && (
-        <a
+        <Link
           href={streamLink}
           target="_blank"
           rel="noopener noreferrer"
@@ -21,7 +22,7 @@ export default function StreamActions({ streamLink, isOwner, onEdit }: StreamAct
             <Eye className="h-5 w-5 mr-2" />
             Watch on YouTube
           </Button>
-        </a>
+        </Link>
       )}
       <Button
         variant="outline"

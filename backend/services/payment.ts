@@ -79,14 +79,15 @@ export const getSentPaymentsByUserId = async (
       whereClause.status = status;
     }
 
-    // Calculate skip value for pagination
+    // * 1. Calculate skip value for pagination
     const skip = (page - 1) * limit;
 
-    // Get total count for pagination info
+    // * 2. Get total count for pagination info
     const totalCount = await prisma.payment.count({
       where: whereClause,
     });
 
+    // * 3. Get payments
     const payments = await prisma.payment.findMany({
       where: whereClause,
       select: {
@@ -164,19 +165,20 @@ export const getReceivedPaymentsByStreamerId = async (
       },
     };
     
-    // * if status is provided, add it to the where clause
+    // * 1. if status is provided, add it to the where clause
     if (status !== undefined) {
       whereClause.status = status;
     }
 
-    // * Calculate skip value for pagination
+    // * 2. Calculate skip value for pagination
     const skip = (page - 1) * limit;
 
-    // * Get total count for pagination info
+    // * 3. Get total count for pagination info
     const totalCount = await prisma.payment.count({
       where: whereClause,
     });
 
+    // * 4. Get payments with pagination
     const payments = await prisma.payment.findMany({
       where: whereClause,
       select: {
@@ -212,7 +214,7 @@ export const getReceivedPaymentsByStreamerId = async (
       throw new Error("No payments found for streamer");
     }
 
-    // * Calculate pagination info
+    // * 5. Calculate pagination info
     const totalPages = Math.ceil(totalCount / limit);
     const hasNextPage = page < totalPages;
     const hasPrevPage = page > 1;

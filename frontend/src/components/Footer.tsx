@@ -12,7 +12,7 @@ export default function Footer() {
           <Link href="/about" className="hover:underline underline-offset-4">About</Link>
           <Link href="/streams" className="hover:underline underline-offset-4">Streams</Link>
           <Link href="/profile" className="hover:underline underline-offset-4">Profile</Link>
-          <a href="mailto:support@tubepay.com" className="hover:underline underline-offset-4">Contact</a>
+          <Link href="mailto:support@tubepay.com" className="hover:underline underline-offset-4">Contact</Link>
         </div>
         <div className="text-xs text-gray-500 text-center md:text-right">
           Made by Manik Lakhanpal

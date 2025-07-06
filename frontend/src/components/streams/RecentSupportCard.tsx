@@ -17,7 +17,7 @@ export default function RecentSupportCard({ payments }: RecentSupportCardProps) 
         <div className="space-y-3">
           {payments && payments.length > 0 ? (
             <div className="space-y-4">
-              {payments.map((payment) => (
+              {payments.slice(0, 4).map((payment) => (
                 <div
                   key={payment.id}
                   className="flex items-center gap-3 border-b pb-3 last:border-b-0 last:pb-0"

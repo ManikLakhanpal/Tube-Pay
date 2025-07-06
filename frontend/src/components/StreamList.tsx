@@ -49,7 +49,7 @@ export function StreamCard({ stream }: StreamCardProps) {
 
         <div className="flex space-x-2">
           {stream.streamLink && (
-            <a
+            <Link
               href={stream.streamLink}
               target="_blank"
               rel="noopener noreferrer"
@@ -59,7 +59,7 @@ export function StreamCard({ stream }: StreamCardProps) {
                 <Eye className="h-4 w-4 mr-2" />
                 Watch Stream
               </Button>
-            </a>
+            </Link>
           )}
           <Link href={`/streams/${stream.id}`} className="flex-1">
             <Button className="w-full whitespace-nowrap">

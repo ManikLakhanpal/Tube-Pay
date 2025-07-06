@@ -12,6 +12,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 import CreateStreamDialog from "@/components/profile/CreateStreamDialog";
 import ProfileInformationHeader from "@/components/profile/ProfileInformation";
 
@@ -20,6 +21,7 @@ export default function ProfileView({ userId }: { userId?: string }) {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const { user: authUser } = useAuth();
+  const router = useRouter();
   const isOwnProfile = !userId || (authUser && userId === authUser.uid);
 
   // Create Stream state
@@ -171,6 +173,7 @@ export default function ProfileView({ userId }: { userId?: string }) {
                         <Button
                           variant="outline"
                           className="w-full justify-star text-black hover:cursor-pointer hover:bg-green-500"
+                          onClick={() => router.push('/payments')}
                         >
                           <DollarSign className="h-4 w-4 mr-2" />
                           View Income
