@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { useAuth } from "@/contexts/AuthContext";
@@ -40,7 +40,7 @@ export default function PaymentsPage() {
   const { user } = useAuth();
   const router = useRouter();
 
-  const fetchPayments = async () => {
+  const fetchPayments = useCallback(async () => {
     if (!user?.uid) return;
 
     setLoading(true);
@@ -62,11 +62,11 @@ export default function PaymentsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [paymentType, statusFilter, currentPage, itemsPerPage, user?.uid]);
 
   useEffect(() => {
     fetchPayments();
-  }, [paymentType, statusFilter, currentPage, itemsPerPage, user?.uid, fetchPayments]);
+  }, [fetchPayments]);
 
   const handlePaymentClick = (payment: Payment) => {
     setSelectedPayment(payment);
