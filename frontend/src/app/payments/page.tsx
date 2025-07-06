@@ -7,16 +7,22 @@ import { useAuth } from "@/contexts/AuthContext";
 import { ArrowLeft, DollarSign } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-// Components
+// * Components
 import PaymentFilters from "@/components/payments/PaymentFilters";
 import PaymentTable from "@/components/payments/PaymentTable";
 import PaymentCards from "@/components/payments/PaymentCards";
 import PaymentPagination from "@/components/payments/PaymentPagination";
 import PaymentDetailsPopup from "@/components/payments/PaymentDetailsPopup";
 
-// Types and Utils
-import { Payment, PaymentResponse, PaymentType, PaymentStatus } from "@/types/payments";
+// * Types and Utils
+import {
+  Payment,
+  PaymentResponse,
+  PaymentType,
+  PaymentStatus,
+} from "@/types/payments";
 import { getStatusColor, formatDate, formatAmount } from "@/lib/paymentUtils";
+import { paymentAPI } from "@/lib/api";
 
 export default function PaymentsPage() {
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -24,8 +30,8 @@ export default function PaymentsPage() {
   const [loading, setLoading] = useState(true);
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
   const [showPaymentDetails, setShowPaymentDetails] = useState(false);
-  
-  // Filters
+
+  // * Filters
   const [paymentType, setPaymentType] = useState<PaymentType>("received");
   const [statusFilter, setStatusFilter] = useState<PaymentStatus>("all");
   const [currentPage, setCurrentPage] = useState(1);
@@ -39,33 +45,18 @@ export default function PaymentsPage() {
 
     setLoading(true);
     try {
-      const endpoint = paymentType === "sent" 
-        ? `${process.env.NEXT_PUBLIC_API_URL}/api/payment/sent` 
-        : `${process.env.NEXT_PUBLIC_API_URL}/api/payment/received`;
+      let data: PaymentResponse;
       
-      const params = new URLSearchParams({
-        page: currentPage.toString(),
-        limit: itemsPerPage.toString(),
-      });
-
-      if (statusFilter !== "all") {
-        params.append("status", statusFilter);
-      }
-
-      const response = await fetch(`${endpoint}?${params}`, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
-
-      if (response.ok) {
-        const data: PaymentResponse = await response.json();
-        setPayments(data.payments);
-        setPagination(data.pagination);
+      if (paymentType === "sent") {
+        const response = await paymentAPI.getSentPayments(currentPage, itemsPerPage, statusFilter);
+        data = response;
       } else {
-        console.error("Failed to fetch payments");
+        const response = await paymentAPI.getReceivedPayments(currentPage, itemsPerPage, statusFilter);
+        data = response;
       }
+
+      setPayments(data.payments);
+      setPagination(data.pagination);
     } catch (error) {
       console.error("Error fetching payments:", error);
     } finally {
@@ -114,11 +105,10 @@ export default function PaymentsPage() {
             </Button>
             <h1 className="text-3xl font-bold text-black">Payments</h1>
           </div>
+          <p className="text-gray-600">Manage and track your payment history</p>
           <p className="text-gray-600">
-            Manage and track your payment history
-          </p>
-          <p className="text-gray-600">
-            <span className="font-bold">Note:</span> Payments are processed within 24 hours.
+            <span className="font-bold">Note:</span> Payments are processed
+            within 24 hours.
           </p>
         </div>
 
@@ -137,7 +127,6 @@ export default function PaymentsPage() {
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <span>Payment History 🤑</span>
-
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -197,4 +186,4 @@ export default function PaymentsPage() {
       </div>
     </div>
   );
-} 
+}

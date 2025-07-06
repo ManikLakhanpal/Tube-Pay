@@ -1,4 +1,5 @@
-import { User, Stream, Order, Payment } from '@/types';
+import { User, Stream, Order } from '@/types';
+import { Payment } from '@/types/payments';
 
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -169,6 +170,60 @@ export const paymentAPI = {
     } catch (error) {
       console.error('Error verifying payment:', error);
       return null;
+    }
+  },
+
+  getSentPayments: async (page: number, limit: number, statusFilter: string): Promise<{ payments: Payment[]; pagination: any }> => {
+    try {
+
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+      });
+
+      if (statusFilter !== "all") {
+        params.append("status", statusFilter);
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/payment/sent?${params.toString()}`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      if (!response.ok) return { payments: [], pagination: null };
+      return response.json();
+    } catch (error) {
+      console.error('Error fetching sent payments:', error);
+      return { payments: [], pagination: null };
+    }
+  },
+
+  getReceivedPayments: async (page: number, limit: number, statusFilter: string): Promise<{ payments: Payment[]; pagination: any }> => {
+    try {
+
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+      });
+
+      if (statusFilter !== "all") {
+        params.append("status", statusFilter);
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/payment/received?${params.toString()}`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      if (!response.ok) return { payments: [], pagination: null };
+      return response.json();
+    } catch (error) {
+      console.error('Error fetching received payments:', error);
+      return { payments: [], pagination: null };
     }
   },
 }; 
