@@ -66,7 +66,7 @@ export default function PaymentsPage() {
 
   useEffect(() => {
     fetchPayments();
-  }, [paymentType, statusFilter, currentPage, itemsPerPage, user?.uid]);
+  }, [paymentType, statusFilter, currentPage, itemsPerPage, user?.uid, fetchPayments]);
 
   const handlePaymentClick = (payment: Payment) => {
     setSelectedPayment(payment);

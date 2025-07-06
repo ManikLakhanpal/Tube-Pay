@@ -4,6 +4,7 @@ import PopupBox from "@/components/ui/PopupBox";
 import { User, Calendar, MessageSquare } from "lucide-react";
 import { Payment, PaymentType } from "@/types/payments";
 import Link from "next/link";
+import Image from "next/image";
 
 interface PaymentDetailsPopupProps {
   payment: Payment | null;
@@ -63,10 +64,12 @@ export default function PaymentDetailsPopup({
           </h3>
           <div className="flex items-center gap-3">
             {payment.user?.avatarUrl ? (
-              <img
+              <Image
                 src={payment.user.avatarUrl}
                 alt={payment.user.name}
                 className="w-12 h-12 rounded-full"
+                width={48}
+                height={48}
               />
             ) : (
               <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center">

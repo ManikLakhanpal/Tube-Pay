@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/Button";
 import { Eye, User } from "lucide-react";
 import { Payment } from "@/types/payments";
+import Image from "next/image";
 
 interface PaymentTableProps {
   payments: Payment[];
@@ -45,10 +46,12 @@ export default function PaymentTable({
               <td className="py-3 px-4">
                 <div className="flex items-center gap-3">
                   {payment.user?.avatarUrl ? (
-                    <img
+                    <Image
                       src={payment.user.avatarUrl}
                       alt={payment.user.name}
                       className="w-8 h-8 rounded-full"
+                      width={32}
+                      height={32}
                     />
                   ) : (
                     <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">

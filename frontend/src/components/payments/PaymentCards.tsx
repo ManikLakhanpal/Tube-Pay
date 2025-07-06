@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/Button";
 import { Eye, User } from "lucide-react";
 import { Payment } from "@/types/payments";
+import Image from "next/image";
 
 interface PaymentCardsProps {
   payments: Payment[];
@@ -30,10 +31,12 @@ export default function PaymentCards({
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
               {payment.user?.avatarUrl ? (
-                <img
+                <Image
                   src={payment.user.avatarUrl}
                   alt={payment.user.name}
                   className="w-10 h-10 rounded-full"
+                  width={40}
+                  height={40}
                 />
               ) : (
                 <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">

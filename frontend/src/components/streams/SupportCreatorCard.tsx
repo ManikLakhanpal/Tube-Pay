@@ -91,7 +91,7 @@ export default function SupportCreatorCard({ streamId, onPaymentSuccess }: Suppo
               razorpay_signature: response.razorpay_signature,
             });
 
-            if (verificationResponse?.success) {
+            if (verificationResponse?.status === "SUCCESS") {
               setPaymentStatus("Payment successful! Thank you for your support.");
               setAmount(0);
               setCustomAmount("");
