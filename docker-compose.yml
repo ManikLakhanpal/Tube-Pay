@@ -1,0 +1,80 @@
+version: "3.8"
+
+services:
+  frontend:
+    build: ./frontend
+    ports: 
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+      - NEXT_PUBLIC_RAZORPAY_KEY_ID=${NEXT_PUBLIC_RAZORPAY_KEY_ID}
+    depends_on:
+      - backend
+      - database
+    networks:
+      - my-custom-network
+
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    environment:
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - BACKEND_URL=${BACKEND_URL}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - SESSION_SECRET=${SESSION_SECRET}
+      - NODE_ENV=${NODE_ENV}
+      - PORT=${PORT}
+      - RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID}
+      - RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET}
+    command: >
+      sh -c "
+        echo 'Waiting for database and redis to be ready...' &&
+        while ! nc -z database 5432; do
+          sleep 1
+        done &&
+        while ! nc -z redis 6379; do
+          sleep 1
+        done &&
+        echo 'Database and Redis are ready!' &&
+        npx prisma migrate deploy &&
+        npm run start
+      "
+    depends_on:
+      - database
+      - redis
+    networks:
+      - my-custom-network
+
+  database:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - my-custom-network
+
+  redis:
+    image: redis/redis-stack:latest
+    ports:
+      - "6379:6379"
+      - "8001:8001"
+    volumes:
+      - redis_data:/data
+    networks:
+      - my-custom-network
+
+volumes:
+  pgdata:
+  redis_data:
+
+networks:
+  my-custom-network:
+    driver: bridge
