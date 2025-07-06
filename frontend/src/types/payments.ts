@@ -4,6 +4,7 @@ export interface Payment {
   message: string | null;
   createdAt: string;
   status: "PENDING" | "SUCCESS" | "FAILED";
+  success: boolean;
   user?: {
     id: string;
     name: string;
