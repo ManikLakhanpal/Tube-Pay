@@ -56,6 +56,28 @@ export const getPayment = async (id: string) => {
     console.log(`🗄️ Fetching payment ${id} from database`);
     const payment = await prisma.payment.findUnique({
       where: { id },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        stream: {
+          select: {
+            id: true,
+            title: true,
+            streamer: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!payment) {
@@ -284,11 +306,57 @@ export const getReceivedPaymentsByStreamerId = async (
 /*
  *    Updates a payment by id with cache invalidation, returns updated payment object or null on error
  */
-export const updatePayment = async (id: string, status: PaymentStatus) => {
+export type PaymentWithRelations = {
+  id: string;
+  amount: number;
+  message: string | null;
+  userId: string;
+  streamId: string;
+  status: PaymentStatus;
+  createdAt: Date;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  stream: {
+    id: string;
+    title: string;
+    streamer: {
+      id: string;
+      name: string;
+      email: string;
+    };
+  };
+};
+
+export const updatePayment = async (id: string, status: PaymentStatus): Promise<PaymentWithRelations> => {
   try {
     const payment = await prisma.payment.update({
       where: { id },
       data: { status },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        stream: {
+          select: {
+            id: true,
+            title: true,
+            streamer: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!payment) {
@@ -296,7 +364,7 @@ export const updatePayment = async (id: string, status: PaymentStatus) => {
       throw new Error("Payment not found");
     }
 
-    // Update the payment in cache
+    // Update the payment in cache with relations
     await RedisService.cachePaymentDetails(id, payment);
 
     // Invalidate related caches

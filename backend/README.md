@@ -52,6 +52,10 @@ REDIS_URL="redis://localhost:6379"
 # Razorpay (for payments)
 RAZORPAY_KEY_ID="your-razorpay-key-id"
 RAZORPAY_KEY_SECRET="your-razorpay-key-secret"
+
+# RESEND (for sending emails)
+RESEND_KEY="your-resend-api-key"
+RESEND_EMAIL="your-resend-email"
 ```
 
 ### 3. Database Setup
@@ -149,6 +153,7 @@ npm run dev
 - **CORS Protection** - Cross-origin security
 - **Input Validation** - Data sanitization and validation
 - **Authentication Middleware** - Protected routes
+- **Email Notifications** - Secure payment confirmations via Resend
 
 ## 📊 Performance Features
 
@@ -201,6 +206,12 @@ docker run -p 5000:5000 tube-pay-backend
 2. Get your API keys from the dashboard
 3. Add keys to `.env` file
 
+### Resend Email Setup
+1. Sign up at [Resend](https://resend.com/)
+2. Get your API key from the dashboard
+3. Add your verified domain email to `.env` file
+4. The system will automatically send payment notifications to both parties
+
 ## 🚀 Development
 
 ```bash
@@ -232,6 +243,8 @@ npm run build
 | `REDIS_URL` | Redis connection string | Yes | - |
 | `RAZORPAY_KEY_ID` | Razorpay API key ID | Yes | - |
 | `RAZORPAY_KEY_SECRET` | Razorpay API secret | Yes | - |
+| `RESEND_KEY` | RESEND API secret | Yes | - |
+| `RESEND_EMAIL` | Email for sending mails | Yes | - |
 
 ## 🤝 Contributing
 

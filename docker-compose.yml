@@ -30,6 +30,7 @@ services:
       - PORT=${PORT}
       - RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID}
       - RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET}
+      - RESEND_KEY=${RESEND_KEY}
     command: >
       sh -c "
         echo 'Waiting for database and redis to be ready...' &&

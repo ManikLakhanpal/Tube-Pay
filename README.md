@@ -112,6 +112,10 @@ REDIS_URL="redis://localhost:6379"
 # Razorpay (for payments)
 RAZORPAY_KEY_ID="your-razorpay-key-id"
 RAZORPAY_KEY_SECRET="your-razorpay-key-secret"
+
+# RESEND API KEY (for sending emails)
+RESEND_KEY="your-resend-api-key"
+RESEND_EMAIL="your-resend-email"
 ```
 
 ```bash

@@ -1,5 +1,8 @@
 import { createUser, findUser, updateUserProfile } from "../services/user";
 import { reqUser } from "../types";
+import sendMail from "./resend";
+import { promises as fs } from 'fs';
+import path from 'path';
 
 /*
  *    Logs in user, returns user object or null on error
@@ -26,8 +29,22 @@ export const loginUser = async (req: reqUser, res: any) => {
       req.user.uid = user!.id;
     }
 
-    // * Step 3: Return the user
-    res.status(200).json(user);
+    // * Step 3: Send Login email to the user
+    const templatePath = path.join(__dirname, '../config/resend/emailTemplates/loginSuccess.html');
+
+    let html = await fs.readFile(templatePath, 'utf-8');
+    html = html.replace(/{{username}}/g, name);
+
+    const emailInfo = {
+      to: email,
+      subject: "Successfully Logged In" as const,
+      html: html
+    };
+    
+    await sendMail(emailInfo);
+
+    // * Step 4: Return the user
+    return res.status(200).json(user);
 
   } catch (error) {
     console.error("Error logging in user:", error);
@@ -50,7 +67,7 @@ export const getUserById = async (req: reqUser, res: any) => {
     }
     
     console.log(user);
-    res.status(200).json(user);
+    return res.status(200).json(user);
   } catch (error) {
     console.error("Error fetching user profile:", error);
     return res.status(500).json({ error: "Internal Server Error" });

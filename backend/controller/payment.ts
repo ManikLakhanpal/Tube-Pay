@@ -1,10 +1,22 @@
 import crypto from "crypto";
 import { reqUser } from "../types";
 import razorpay from "../config/razorpay";
-import { createPayment, getPayment, updatePayment } from "../services/payment";
-import { getSentPaymentsByUserId, getReceivedPaymentsByStreamerId } from "../services/payment";
+import {
+  createPayment,
+  getPayment,
+  PaymentWithRelations,
+  updatePayment,
+} from "../services/payment";
+import {
+  getSentPaymentsByUserId,
+  getReceivedPaymentsByStreamerId,
+} from "../services/payment";
 import { PaymentStatus } from "@prisma/client";
 import { RedisService } from "../services/redis";
+import sendMail from "./resend";
+import { promises as fs } from "fs";
+import path from "path";
+import prisma from "../config/prisma";
 
 /*
  *    Creates an order with rate limiting
@@ -15,15 +27,15 @@ export const createOrderHandler = async (req: reqUser, res: any) => {
   try {
     // Rate limiting: max 10 orders per minute per user
     const rateLimitAllowed = await RedisService.checkRateLimit(
-      req.user.uid, 
-      'create_order', 
-      10, 
+      req.user.uid,
+      "create_order",
+      10,
       60
     );
 
     if (!rateLimitAllowed) {
-      return res.status(429).json({ 
-        error: "Too many payment requests. Please wait a moment." 
+      return res.status(429).json({
+        error: "Too many payment requests. Please wait a moment.",
       });
     }
 
@@ -79,7 +91,6 @@ export const verifyOrderHandler = async (req: reqUser, res: any) => {
 
     if (!payment) {
       console.log(`Payment not found for order id: ${razorpay_order_id}`);
-
       return res
         .status(404)
         .send({ success: false, message: "Payment not found." });
@@ -91,14 +102,79 @@ export const verifyOrderHandler = async (req: reqUser, res: any) => {
     console.log(
       `Payment verified successfully for payment id: ${razorpay_payment_id}`
     );
-    res
+
+    // * STEP 3: Get updated payment with relations for email
+    await RedisService.invalidatePaymentCaches(
+      razorpay_order_id,
+      payment.userId,
+      payment.streamId
+    );
+    const updatedPayment: PaymentWithRelations =
+      await getPayment(razorpay_order_id);
+
+    // * STEP 4: Send Status emails to the parties involved.
+    try {
+      const senderName = updatedPayment.user.name;
+      const senderEmail = updatedPayment.user.email;
+      const receiverName = updatedPayment.stream.streamer.name;
+      const receiverEmail = updatedPayment.stream.streamer.email;
+      const amount = updatedPayment.amount;
+
+      // * 1. Sending email to the sender
+      try {
+        const sentTemplatePath = path.join(
+          __dirname,
+          "../config/resend/emailTemplates/paymentSent.html"
+        );
+        let sentHtml = await fs.readFile(sentTemplatePath, "utf-8");
+        sentHtml = sentHtml
+          .replace(/{{username}}/g, senderName)
+          .replace(/{{amount}}/g, amount.toString())
+          .replace(/{{receiver}}/g, receiverName)
+          .replace(/{{status}}/g, "success")
+          .replace(/{{reason}}/g, "");
+        await sendMail({
+          to: senderEmail,
+          subject: "Successfully Sent Donation" as const,
+          html: sentHtml,
+        });
+        console.log(`✅ Payment success email sent to sender: ${senderEmail}`);
+      } catch (error) {
+        console.error("❌ Failed to send email to the sender:", error);
+      }
+
+      // * 2. Sending email to reciever
+
+      try {
+        const receivedTemplatePath = path.join(
+          __dirname,
+          "../config/resend/emailTemplates/paymentReceived.html"
+        );
+        let receivedHtml = await fs.readFile(receivedTemplatePath, "utf-8");
+        receivedHtml = receivedHtml
+          .replace(/{{username}}/g, receiverName)
+          .replace(/{{amount}}/g, amount.toString())
+          .replace(/{{sender}}/g, senderName);
+        await sendMail({
+          to: receiverEmail,
+          subject: "Successfully Recieved Donation" as const,
+          html: receivedHtml,
+        });
+        console.log(
+          `✅ Payment received email sent to receiver: ${receiverEmail}`
+        );
+      } catch (error) {
+        console.error("❌ Failed to send email to the receiver:", error);
+      }
+    } catch (err) {
+      console.error("Error sending payment emails: ", err);
+    }
+
+    return res
       .status(200)
       .send({ success: true, message: "Payment verified successfully!" });
   } else {
-    console.log(
-      `Payment verification failed for payment id: ${razorpay_payment_id}`
-    );
-    res
+    return res
       .status(401)
       .send({ success: false, message: "Payment verification failed." });
   }
@@ -115,11 +191,11 @@ export const getSentPaymentsHandler = async (req: reqUser, res: any) => {
       parseInt(limit as string) || 10
     );
 
-    res.status(200).json(payments);
+    return res.status(200).json(payments);
   } catch (err) {
     console.log(err);
-
-    res.status(500).send("Error getting sent payments");
+ 
+    return res.status(500).send("Error getting sent payments");
   }
 };
 
@@ -134,10 +210,10 @@ export const getReceivedPaymentsHandler = async (req: reqUser, res: any) => {
       parseInt(limit as string) || 10
     );
 
-    res.status(200).json(payments);
+    return res.status(200).json(payments);
   } catch (err) {
     console.log(err);
 
-    res.status(500).send("Error getting received payments");
+    return res.status(500).send("Error getting received payments");
   }
 };

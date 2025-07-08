@@ -267,9 +267,13 @@ export class RedisService {
         }
       }
 
-      // Get streamer ID from stream cache or database (you might need to pass this as parameter)
-      // For now, we'll invalidate all streamer received payments caches
-      // You can optimize this by storing streamer ID in payment data
+      // Invalidate all streamer received payments caches
+      const streamerReceivedKeys = await redisClient.keys(`streamer_received_payments:*`);
+      if (streamerReceivedKeys.length > 0) {
+        for (const key of streamerReceivedKeys) {
+          await redisClient.del(key);
+        }
+      }
       
       // Invalidate stream donations cache
       await redisClient.del(`stream_donations:${streamId}`);
