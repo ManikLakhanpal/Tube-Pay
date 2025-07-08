@@ -1,0 +1,57 @@
+<!-- superchat-overlay.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      margin: 0;
+      background: transparent;
+      overflow: hidden;
+      font-family: sans-serif;
+    }
+    #notification {
+      display: none;
+      position: absolute;
+      bottom: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.1);
+      padding: 1em 2em;
+      border-radius: 12px;
+      color: white;
+      font-size: 24px;
+      animation: fadeInOut 5s ease-in-out;
+    }
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translateY(50px) scale(0.9); }
+      10% { opacity: 1; transform: translateY(0) scale(1); }
+      90% { opacity: 1; }
+      100% { opacity: 0; transform: translateY(-50px) scale(0.9); }
+    }
+  </style>
+</head>
+<body>
+  <div id="notification">Super Chat Received!</div>
+
+  <script>
+    const socket = new WebSocket("ws://YOUR_BACKEND_DOMAIN/ws/superchat");
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      const notif = document.getElementById("notification");
+      notif.innerText = `💸 ${data.username} donated ₹${data.amount}: ${data.message}`;
+      notif.style.display = "block";
+      
+      // Restart animation
+      notif.classList.remove("animate");
+      void notif.offsetWidth; // trigger reflow
+      notif.classList.add("animate");
+
+      // Hide after 5s
+      setTimeout(() => {
+        notif.style.display = "none";
+      }, 5000);
+    };
+  </script>
+</body>
+</html>

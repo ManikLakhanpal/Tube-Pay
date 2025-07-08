@@ -11,6 +11,9 @@ export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const hideNav = /^\/streams\/[^/]+\/superchat$/.test(pathname);
+  
+  if (hideNav) return null;
 
   const handleLogout = async () => {
     await logout();

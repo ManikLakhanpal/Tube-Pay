@@ -1,6 +1,14 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function Footer() {
+  const pathname = usePathname();
+  const hideNav = /^\/streams\/[^/]+\/superchat$/.test(pathname);
+  
+  if (hideNav) return null;
+
   return (
     <footer className="bg-black text-white py-10  border-gray-800 mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">

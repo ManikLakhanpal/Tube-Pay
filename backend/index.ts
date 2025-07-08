@@ -11,8 +11,10 @@ import { reqUser } from "./types";
 import cors from "cors";
 import os from "os";
 import paymentRoutes from "./routes/payment";
+import { createServer } from "http";
 
 const app = express();
+const server = createServer(app);
 const port = process.env.PORT!;
 
 const allowedOrigins = [
@@ -68,7 +70,7 @@ app.get('/test', authenticate, (req: reqUser, res: any) => {
     res.status(200).json([{"status": "verified"},{"user" : req.user }]);
 })
 
-app.listen(port, () => {
+server.listen(port, () => {
   const interfaces = os.networkInterfaces();
   const addresses: string[] = [];
 
