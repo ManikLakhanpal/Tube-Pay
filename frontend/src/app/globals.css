@@ -24,3 +24,24 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* OBS Transparency Support */
+.transparent-bg {
+  background: transparent !important;
+}
+
+/* For superchat overlay specifically */
+.superchat-overlay {
+  background: transparent !important;
+}
+
+/* Override for superchat layout */
+.superchat-layout body {
+  background: transparent !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.superchat-layout html {
+  background: transparent !important;
+}

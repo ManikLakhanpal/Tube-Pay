@@ -22,6 +22,28 @@ export const createPayment = async (
         streamId,
         status: "PENDING",
       },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        stream: {
+          select: {
+            id: true,
+            title: true,
+            streamer: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!payment) {
@@ -40,10 +62,34 @@ export const createPayment = async (
   }
 };
 
+export type PaymentWithRelations = {
+  id: string;
+  amount: number;
+  message: string | null;
+  userId: string;
+  streamId: string;
+  status: PaymentStatus;
+  createdAt: Date;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  stream: {
+    id: string;
+    title: string;
+    streamer: {
+      id: string;
+      name: string;
+      email: string;
+    };
+  };
+};
+
 /*
  *    Gets a payment by id with Redis caching, returns payment object or null on error
  */
-export const getPayment = async (id: string) => {
+export const getPayment = async (id: string): Promise<PaymentWithRelations> => {
   try {
     // First, try to get from cache
     const cachedPayment = await RedisService.getCachedPaymentDetails(id);
@@ -111,15 +157,23 @@ export const getSentPaymentsByUserId = async (
 ) => {
   try {
     // First, try to get from cache
-    const cachedPayments = await RedisService.getCachedUserSentPayments(userId, status, page);
+    const cachedPayments = await RedisService.getCachedUserSentPayments(
+      userId,
+      status,
+      page
+    );
     if (cachedPayments) {
-      console.log(`📦 Returning cached sent payments for user ${userId} (page: ${page})`);
+      console.log(
+        `📦 Returning cached sent payments for user ${userId} (page: ${page})`
+      );
       return cachedPayments;
     }
 
     // If not in cache, fetch from database
-    console.log(`🗄️ Fetching sent payments for user ${userId} from database (page: ${page})`);
-    
+    console.log(
+      `🗄️ Fetching sent payments for user ${userId} from database (page: ${page})`
+    );
+
     const whereClause: any = { userId };
     // ! if status is provided, add it to the where clause
     if (status !== undefined) {
@@ -160,7 +214,7 @@ export const getSentPaymentsByUserId = async (
       skip,
       take: limit,
       orderBy: {
-        createdAt: 'desc', // * Most recent payments first
+        createdAt: "desc", // * Most recent payments first
       },
     });
 
@@ -212,21 +266,29 @@ export const getReceivedPaymentsByStreamerId = async (
 ) => {
   try {
     // First, try to get from cache
-    const cachedPayments = await RedisService.getCachedStreamerReceivedPayments(streamerId, status, page);
+    const cachedPayments = await RedisService.getCachedStreamerReceivedPayments(
+      streamerId,
+      status,
+      page
+    );
     if (cachedPayments) {
-      console.log(`📦 Returning cached received payments for streamer ${streamerId} (page: ${page})`);
+      console.log(
+        `📦 Returning cached received payments for streamer ${streamerId} (page: ${page})`
+      );
       return cachedPayments;
     }
 
     // If not in cache, fetch from database
-    console.log(`🗄️ Fetching received payments for streamer ${streamerId} from database (page: ${page})`);
-    
+    console.log(
+      `🗄️ Fetching received payments for streamer ${streamerId} from database (page: ${page})`
+    );
+
     const whereClause: any = {
       stream: {
         streamerId: streamerId,
       },
     };
-    
+
     // * 1. if status is provided, add it to the where clause
     if (status !== undefined) {
       whereClause.status = status;
@@ -267,7 +329,7 @@ export const getReceivedPaymentsByStreamerId = async (
       skip,
       take: limit,
       orderBy: {
-        createdAt: 'desc', // * Most recent payments first
+        createdAt: "desc", // * Most recent payments first
       },
     });
 
@@ -294,7 +356,12 @@ export const getReceivedPaymentsByStreamerId = async (
     };
 
     // Cache the result for future requests
-    await RedisService.cacheStreamerReceivedPayments(streamerId, status, page, result);
+    await RedisService.cacheStreamerReceivedPayments(
+      streamerId,
+      status,
+      page,
+      result
+    );
 
     return result;
   } catch (error) {
@@ -306,31 +373,10 @@ export const getReceivedPaymentsByStreamerId = async (
 /*
  *    Updates a payment by id with cache invalidation, returns updated payment object or null on error
  */
-export type PaymentWithRelations = {
-  id: string;
-  amount: number;
-  message: string | null;
-  userId: string;
-  streamId: string;
-  status: PaymentStatus;
-  createdAt: Date;
-  user: {
-    id: string;
-    name: string;
-    email: string;
-  };
-  stream: {
-    id: string;
-    title: string;
-    streamer: {
-      id: string;
-      name: string;
-      email: string;
-    };
-  };
-};
-
-export const updatePayment = async (id: string, status: PaymentStatus): Promise<PaymentWithRelations> => {
+export const updatePayment = async (
+  id: string,
+  status: PaymentStatus
+): Promise<PaymentWithRelations> => {
   try {
     const payment = await prisma.payment.update({
       where: { id },
@@ -368,11 +414,18 @@ export const updatePayment = async (id: string, status: PaymentStatus): Promise<
     await RedisService.cachePaymentDetails(id, payment);
 
     // Invalidate related caches
-    await RedisService.invalidatePaymentCaches(id, payment.userId, payment.streamId);
+    await RedisService.invalidatePaymentCaches(
+      id,
+      payment.userId,
+      payment.streamId
+    );
 
     // If payment is successful, update stream donations
     if (status === "SUCCESS") {
-      await RedisService.incrementStreamDonations(payment.streamId, payment.amount);
+      await RedisService.incrementStreamDonations(
+        payment.streamId,
+        payment.amount
+      );
     }
 
     return payment;

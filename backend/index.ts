@@ -12,6 +12,7 @@ import cors from "cors";
 import os from "os";
 import paymentRoutes from "./routes/payment";
 import { createServer } from "http";
+import { Server as SocketIOServer } from "socket.io";
 
 const app = express();
 const server = createServer(app);
@@ -69,6 +70,25 @@ app.get('/test', authenticate, (req: reqUser, res: any) => {
 
     res.status(200).json([{"status": "verified"},{"user" : req.user }]);
 })
+
+const io = new SocketIOServer(server, {
+  cors: {
+    origin: allowedOrigins,
+    credentials: true,
+  },
+});
+
+// Superchat namespace or event
+io.on("connection", (socket) => {
+  console.log("Socket connected:", socket.id);
+  // Optionally, join a room per streamId if you want to scope notifications
+  socket.on("join_stream", (streamId) => {
+    socket.join(`stream_${streamId}`);
+  });
+});
+
+// Export io for use in controllers
+export { io };
 
 server.listen(port, () => {
   const interfaces = os.networkInterfaces();

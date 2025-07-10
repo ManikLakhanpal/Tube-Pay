@@ -16,7 +16,7 @@ import { RedisService } from "../services/redis";
 import sendMail from "./resend";
 import { promises as fs } from "fs";
 import path from "path";
-import prisma from "../config/prisma";
+import { io } from "../index";
 
 /*
  *    Creates an order with rate limiting
@@ -89,6 +89,8 @@ export const verifyOrderHandler = async (req: reqUser, res: any) => {
     // * STEP 1: Get the payment
     const payment = await getPayment(razorpay_order_id);
 
+    console.log(`This is the info ${JSON.stringify(payment)}`)
+
     if (!payment) {
       console.log(`Payment not found for order id: ${razorpay_order_id}`);
       return res
@@ -98,6 +100,19 @@ export const verifyOrderHandler = async (req: reqUser, res: any) => {
 
     // * STEP 2: Update the payment
     await updatePayment(razorpay_order_id, "SUCCESS");
+
+    // * EMIT SUPERCHAT EVENT
+
+    try {
+      io.to(`stream_${payment.streamId}`).emit("superchat", {
+      username: payment.user.name,
+      amount: payment.amount,
+      message: payment.message,
+      streamId: payment.streamId,
+    });
+    } catch(error) {
+      console.error(`Error sending websocket signal ${error}`)
+    }
 
     console.log(
       `Payment verified successfully for payment id: ${razorpay_payment_id}`
