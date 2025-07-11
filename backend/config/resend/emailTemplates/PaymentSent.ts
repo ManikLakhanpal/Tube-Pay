@@ -1,9 +1,16 @@
-<!DOCTYPE html>
+function PaymentSent(
+  username: string,
+  amount: number,
+  receiver: string,
+  status: string
+) {
+  return `
+    <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login Successful</title>
+  <title>Payment ${status}</title>
   <style>
     body {
       background: #111;
@@ -45,18 +52,28 @@
       border-top: 1px solid #333;
       margin: 24px 0;
     }
+    .status-success {
+      color: #00ffae;
+    }
+    .status-fail {
+      color: #ff4d4d;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="icon">🔒</div>
-    <h1>Login Successful</h1>
-    <p>Hi <b>{{username}}</b>,<br>Your login to <b>Tube Pay</b> was successful.<br>Welcome back!</p>
+    <div class="icon">💸</div>
+    <h1>Payment <span class="status-{{status}}">{{status}}</span></h1>
+    <p>Hi <b>${username}</b>,<br>Your payment of <b>&#8377;${amount}</b> to <b>${receiver}</b> was <span class="status-${status}">${status}</span>.</p>
     <hr class="divider" />
     <div class="footer">
-      If this wasn't you, please secure your account immediately.<br>
+      Thank you for using Tube Pay.<br>
       &copy; Tube Pay
     </div>
   </div>
 </body>
 </html> 
+  `;
+}
+
+export { PaymentSent };

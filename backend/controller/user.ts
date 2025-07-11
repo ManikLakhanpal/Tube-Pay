@@ -1,8 +1,7 @@
 import { createUser, findUser, updateUserProfile } from "../services/user";
 import { reqUser } from "../types";
 import sendMail from "./resend";
-import { promises as fs } from 'fs';
-import path from 'path';
+import { LoginSuccess } from "../config/resend/";
 
 /*
  *    Logs in user, returns user object or null on error
@@ -30,15 +29,10 @@ export const loginUser = async (req: reqUser, res: any) => {
     }
 
     // * Step 3: Send Login email to the user
-    const templatePath = path.join(__dirname, '../config/resend/emailTemplates/loginSuccess.html');
-
-    let html = await fs.readFile(templatePath, 'utf-8');
-    html = html.replace(/{{username}}/g, name);
-
     const emailInfo = {
       to: email,
       subject: "Successfully Logged In" as const,
-      html: html
+      html: LoginSuccess(name)
     };
     
     await sendMail(emailInfo);

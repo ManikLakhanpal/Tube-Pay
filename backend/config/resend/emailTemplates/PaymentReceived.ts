@@ -1,9 +1,14 @@
-<!DOCTYPE html>
+function PaymentReceived(
+  username: string,
+  amount: number,
+  sender: string
+) {
+  return (`<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Payment {{status}}</title>
+  <title>Payment Received</title>
   <style>
     body {
       background: #111;
@@ -45,19 +50,17 @@
       border-top: 1px solid #333;
       margin: 24px 0;
     }
-    .status-success {
+    .amount {
       color: #00ffae;
-    }
-    .status-fail {
-      color: #ff4d4d;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="icon">💸</div>
-    <h1>Payment <span class="status-{{status}}">{{status}}</span></h1>
-    <p>Hi <b>{{username}}</b>,<br>Your payment of <b>&#8377;{{amount}}</b> to <b>{{receiver}}</b> was <span class="status-{{status}}">{{status}}</span>.</p>
+    <div class="icon">🎉</div>
+    <h1>Payment Received</h1>
+    <p>Hi <b>${username}</b>,<br>You have received a payment of <span class="amount">&#8377;${amount}</span> from <b>${sender}</b>.<br>Congratulations!</p>
     <hr class="divider" />
     <div class="footer">
       Thank you for using Tube Pay.<br>
@@ -65,4 +68,7 @@
     </div>
   </div>
 </body>
-</html> 
+</html> `);
+}
+
+export { PaymentReceived };

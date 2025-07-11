@@ -23,10 +23,13 @@ export function StreamCard({ stream }: StreamCardProps) {
     <Card key={stream.id} className="hover:shadow-lg transition-shadow">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
+          {(stream.isLive == true) && (
+            <div className="flex items-center space-x-2">
             <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
             <span className="text-sm font-medium text-red-600">LIVE</span>
           </div>
+          )}
+          
         </div>
         <CardTitle className="line-clamp-2">{stream.title}</CardTitle>
         <CardDescription className="line-clamp-2">

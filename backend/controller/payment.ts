@@ -14,9 +14,8 @@ import {
 import { PaymentStatus } from "@prisma/client";
 import { RedisService } from "../services/redis";
 import sendMail from "./resend";
-import { promises as fs } from "fs";
-import path from "path";
 import { io } from "../index";
+import { PaymentSent, PaymentReceived } from "../config/resend/";
 
 /*
  *    Creates an order with rate limiting
@@ -137,21 +136,10 @@ export const verifyOrderHandler = async (req: reqUser, res: any) => {
 
       // * 1. Sending email to the sender
       try {
-        const sentTemplatePath = path.join(
-          __dirname,
-          "../config/resend/emailTemplates/paymentSent.html"
-        );
-        let sentHtml = await fs.readFile(sentTemplatePath, "utf-8");
-        sentHtml = sentHtml
-          .replace(/{{username}}/g, senderName)
-          .replace(/{{amount}}/g, amount.toString())
-          .replace(/{{receiver}}/g, receiverName)
-          .replace(/{{status}}/g, "success")
-          .replace(/{{reason}}/g, "");
         await sendMail({
           to: senderEmail,
           subject: "Successfully Sent Donation" as const,
-          html: sentHtml,
+          html: PaymentSent(senderName, amount, receiverName, "suceess"),
         });
         console.log(`✅ Payment success email sent to sender: ${senderEmail}`);
       } catch (error) {
@@ -161,19 +149,10 @@ export const verifyOrderHandler = async (req: reqUser, res: any) => {
       // * 2. Sending email to reciever
 
       try {
-        const receivedTemplatePath = path.join(
-          __dirname,
-          "../config/resend/emailTemplates/paymentReceived.html"
-        );
-        let receivedHtml = await fs.readFile(receivedTemplatePath, "utf-8");
-        receivedHtml = receivedHtml
-          .replace(/{{username}}/g, receiverName)
-          .replace(/{{amount}}/g, amount.toString())
-          .replace(/{{sender}}/g, senderName);
         await sendMail({
           to: receiverEmail,
           subject: "Successfully Recieved Donation" as const,
-          html: receivedHtml,
+          html: PaymentReceived(receiverName, amount, senderName),
         });
         console.log(
           `✅ Payment received email sent to receiver: ${receiverEmail}`
@@ -195,6 +174,11 @@ export const verifyOrderHandler = async (req: reqUser, res: any) => {
   }
 };
 
+/*
+ *    Gets the sent payments for the user
+ *    GET /api/payment/sent
+ *    Returns: array of sent payments
+ */
 export const getSentPaymentsHandler = async (req: reqUser, res: any) => {
   try {
     const { status, page, limit } = req.query;
@@ -214,6 +198,12 @@ export const getSentPaymentsHandler = async (req: reqUser, res: any) => {
   }
 };
 
+
+/*
+ *    Gets the received payments for the streamer
+ *    GET /api/payment/received
+ *    Returns: array of received payments
+ */
 export const getReceivedPaymentsHandler = async (req: reqUser, res: any) => {
   try {
     const { status, page, limit } = req.query;

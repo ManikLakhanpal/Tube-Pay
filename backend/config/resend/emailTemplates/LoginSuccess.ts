@@ -1,9 +1,11 @@
-<!DOCTYPE html>
+function LoginSuccess(username: string) {
+  return `
+    <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Payment Received</title>
+  <title>Login Successful</title>
   <style>
     body {
       background: #111;
@@ -45,22 +47,22 @@
       border-top: 1px solid #333;
       margin: 24px 0;
     }
-    .amount {
-      color: #00ffae;
-      font-weight: bold;
-    }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="icon">🎉</div>
-    <h1>Payment Received</h1>
-    <p>Hi <b>{{username}}</b>,<br>You have received a payment of <span class="amount">&#8377;{{amount}}</span> from <b>{{sender}}</b>.<br>Congratulations!</p>
+    <div class="icon">🔒</div>
+    <h1>Login Successful</h1>
+    <p>Hi <b>${username}</b>,<br>Your login to <b>Tube Pay</b> was successful.<br>Welcome back!</p>
     <hr class="divider" />
     <div class="footer">
-      Thank you for using Tube Pay.<br>
+      If this wasn't you, please secure your account immediately.<br>
       &copy; Tube Pay
     </div>
   </div>
 </body>
 </html> 
+  `;
+}
+
+export { LoginSuccess };
