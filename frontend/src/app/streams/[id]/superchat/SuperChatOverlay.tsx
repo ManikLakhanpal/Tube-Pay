@@ -28,7 +28,7 @@ export default function SuperChatOverlay() {
     // Listen for superchat events
     socket.on('superchat', (data: SuperChatMessage) => {
       setSuperChat(data);
-      setTimeout(() => setSuperChat(null), 5000);
+      setTimeout(() => setSuperChat(null), 10000);
     });
 
     return () => {
